@@ -7,6 +7,8 @@ namespace InventoryManagement_Backend.Controllers
     [ApiController]
     public class SuppliersController : ControllerBase
     {
-        public SuppliersController() { Console.Write("Manish is hero"); }
+        public SuppliersController() { Console.Write("Manish is hero");
+            Console.WriteLine("Charishma is heroine");
+        }
     }
 }
