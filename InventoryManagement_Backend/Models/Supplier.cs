@@ -13,11 +13,15 @@ namespace InventoryManagement_Backend.Models
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(50)]
-        public string? Contact { get; set; }
+        //[MaxLength(50)]
+        public int MobileNumber { get; set; }
+        public string EmailID { get; set; } = string.Empty;
+        public string ProductCategory { get; set; } = string.Empty;
 
         // Navigation
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<Transaction> PurchaseTransactions { get; set; } = new List<Transaction>();
+        
+        
     }
 }
