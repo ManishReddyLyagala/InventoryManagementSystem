@@ -1,4 +1,7 @@
 using InventoryManagement_Backend.Data;
+using InventoryManagement_Backend.Services;
+using InventoryManagement_Backend.Services.Interfaces;
+
 //using InventoryManagement_Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +26,7 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 //builder.Services.AddScoped<ISupplierService, SupplierService>();
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
-//builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 var app = builder.Build();
 

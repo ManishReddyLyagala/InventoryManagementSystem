@@ -76,6 +76,7 @@ namespace InventoryManagement_Backend.Data
             modelBuilder.Entity<Product>().HasIndex(p => p.SupplierId);
             modelBuilder.Entity<Transaction>().HasIndex(t => new { t.Type, t.DateTime });
             modelBuilder.Entity<PurchaseOrder>().HasIndex(po => po.TransactionId);
+
         }
     }
 }
