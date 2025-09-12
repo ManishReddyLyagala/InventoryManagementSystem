@@ -2,6 +2,7 @@
 using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using InventoryManagement_Backend.Dtos;
 
 
 namespace InventoryManagement_Backend.Services
@@ -15,13 +16,19 @@ namespace InventoryManagement_Backend.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Transaction>> GetAllAsync()
+        public async Task<IEnumerable<TransactionCreateDto>> GetAllAsync()
         {
             return await _context.Transactions
-                .Include(t => t.Supplier)
-                .Include(t => t.Customer)
-                .Include(t => t.PurchaseOrders)
-                .ToListAsync();
+               .Select(t => new TransactionCreateDto
+               {
+                   Type = t.Type,
+                   DateTime = t.DateTime,
+                   SupplierId = t.SupplierId,
+                   CustomerId = t.CustomerId
+               })
+               .ToListAsync();
+
+
         }
 
         public async Task<Transaction?> GetByIdAsync(int id)
@@ -62,6 +69,29 @@ namespace InventoryManagement_Backend.Services
             _context.Transactions.Remove(transaction);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<Transaction>> FilterAsync(char? type, DateTime? date, int? customerId, int? supplierId)
+        {
+            var query = _context.Transactions
+                .Include(t => t.Customer)
+                .Include(t => t.Supplier)
+                .Include(t => t.PurchaseOrders)
+                .AsQueryable();
+
+            if (type.HasValue)
+                query = query.Where(t => t.Type == type);
+            if (date.HasValue)
+                query = query.Where(t => t.DateTime == date);
+
+            if (customerId.HasValue)
+                query = query.Where(t => t.CustomerId == customerId.Value);
+
+            if (supplierId.HasValue)
+                query = query.Where(t => t.SupplierId == supplierId.Value);
+
+            return await query.ToListAsync();
+            
         }
     }
 }

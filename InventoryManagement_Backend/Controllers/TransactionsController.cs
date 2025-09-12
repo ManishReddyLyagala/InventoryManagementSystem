@@ -52,5 +52,22 @@ namespace InventoryManagement_Backend.Controllers
             if (!success) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterTransactions(
+            string? type,
+            DateTime? date,
+            int? customerId,
+            int? supplierId)
+        {
+            char? typeChar = null;
+
+            if (!string.IsNullOrEmpty(type) && type.Length == 1)
+                typeChar = type[0];
+
+            var transactions = await _transactionService.FilterAsync(typeChar, date, customerId, supplierId);
+            return Ok(transactions);
+        }
+
     }
 }
