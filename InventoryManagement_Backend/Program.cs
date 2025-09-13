@@ -1,5 +1,5 @@
 using InventoryManagement_Backend.Data;
-//using InventoryManagement_Backend.Services;
+using InventoryManagement_Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,9 +24,16 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
 //builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IPurchaseSalesOrdersService, PurchaseSalesOrdersServices>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "InventoryOrigin",
+        policy => policy.WithOrigins("http://localhost:5046/", "https://localhost:7190").AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 var app = builder.Build();
 
+app.UseCors("InventoryOrigin");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

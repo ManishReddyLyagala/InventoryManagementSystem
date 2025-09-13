@@ -15,7 +15,7 @@ namespace InventoryManagement_Backend.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseSalesOrders> PurchaseOrders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,19 +42,35 @@ namespace InventoryManagement_Backend.Data
                 .HasForeignKey(t => t.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<PurchaseSalesOrders>()
+                .Property(p => p.TotalAmount)
+                .HasPrecision(18, 2); // 18 digits total, 2 decimal places
+
             // PurchaseOrder -> Transaction (1..M)
-            modelBuilder.Entity<PurchaseOrder>()
+            modelBuilder.Entity<PurchaseSalesOrders>()
                 .HasOne(po => po.Transaction)
-                .WithMany(t => t.PurchaseOrders)
+                .WithMany(t => t.PurchaseSalesOrders)
                 .HasForeignKey(po => po.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // PurchaseOrder -> Product (1..M)
-            modelBuilder.Entity<PurchaseOrder>()
+            modelBuilder.Entity<PurchaseSalesOrders>()
                 .HasOne(po => po.Product)
-                .WithMany(p => p.PurchaseOrders)
+                .WithMany(p => p.PurchaseSalesOrders)
                 .HasForeignKey(po => po.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<PurchaseSalesOrders>()
+            //    .HasOne(p => p.Customer)
+            //    .WithMany(c => c.)
+            //    .HasForeignKey(p => p.CustomerId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<PurchaseSalesOrders>()
+            //    .HasOne(p => p.Supplier)
+            //    .WithMany(s => s.PurchaseSalesOrders)
+            //    .HasForeignKey(p => p.SupplierId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             // CHECK constraint: Type must be 'P' or 'S'
             modelBuilder.Entity<Transaction>()
@@ -75,7 +91,7 @@ namespace InventoryManagement_Backend.Data
             // Indexes for common lookups
             modelBuilder.Entity<Product>().HasIndex(p => p.SupplierId);
             modelBuilder.Entity<Transaction>().HasIndex(t => new { t.Type, t.DateTime });
-            modelBuilder.Entity<PurchaseOrder>().HasIndex(po => po.TransactionId);
+            modelBuilder.Entity<PurchaseSalesOrders>().HasIndex(po => po.TransactionId);
         }
     }
 }

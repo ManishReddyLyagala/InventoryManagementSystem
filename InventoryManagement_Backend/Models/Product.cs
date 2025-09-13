@@ -28,6 +28,6 @@ namespace InventoryManagement_Backend.Models
         public Supplier Supplier { get; set; } = null!;
 
         // Navigation
-        public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
+        public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();
     }
 }
