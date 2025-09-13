@@ -9,6 +9,6 @@
         public int? SupplierId { get; set; }
         public int? CustomerId { get; set; }
 
-        public List<PurchaseOrderCreateDto> Lines { get; set; } = new();
+        public List<PurchaseSalesOrderDto> Lines { get; set; } = new();
     }
 }

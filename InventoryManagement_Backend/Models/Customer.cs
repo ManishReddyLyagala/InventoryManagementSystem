@@ -14,7 +14,10 @@ namespace InventoryManagement_Backend.Models
         public string Name { get; set; } = string.Empty;
 
         [MaxLength(50)]
-        public string? Contact { get; set; }
+        public string MobileNumber { get; set; }
+        [Required]
+        [EmailAddress]
+        public string EmailID { get; set; }
 
         // Navigation
         public ICollection<Transaction> SalesTransactions { get; set; } = new List<Transaction>();
