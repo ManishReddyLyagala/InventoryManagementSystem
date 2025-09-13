@@ -27,7 +27,7 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 //builder.Services.AddScoped<ISupplierService, SupplierService>();
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
-//builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IPurchaseSalesOrdersService, PurchaseSalesOrdersServices>();
 
 builder.Services.Configure<StockAlertSettings>(builder.Configuration.GetSection("StockAlert"));
