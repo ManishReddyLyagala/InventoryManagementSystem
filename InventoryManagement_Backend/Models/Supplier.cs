@@ -23,5 +23,7 @@ namespace InventoryManagement_Backend.Models
         // Navigation
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<Transaction> PurchaseTransactions { get; set; } = new List<Transaction>();
+        
+        
     }
 }
