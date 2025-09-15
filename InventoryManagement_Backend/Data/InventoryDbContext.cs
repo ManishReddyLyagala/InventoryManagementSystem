@@ -38,7 +38,7 @@ namespace InventoryManagement_Backend.Data
             // Transaction -> Customer (nullable)
             modelBuilder.Entity<Transaction>()
                 .HasOne(t => t.Customer)
-                .WithMany(c => c.SalesTransactions)
+                .WithMany(c => c.Transactions)
                 .HasForeignKey(t => t.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 

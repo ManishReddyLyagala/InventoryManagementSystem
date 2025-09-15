@@ -14,7 +14,7 @@ namespace InventoryManagement_Backend.Models
         /// 'P' = Purchase, 'S' = Sale
         /// </summary>
         [Required]
-        public char Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         [Required]
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
