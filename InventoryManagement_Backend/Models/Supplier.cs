@@ -13,8 +13,7 @@ namespace InventoryManagement_Backend.Models
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        //[MaxLength(50)]
-        public int MobileNumber { get; set; }
+        public long MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
 
