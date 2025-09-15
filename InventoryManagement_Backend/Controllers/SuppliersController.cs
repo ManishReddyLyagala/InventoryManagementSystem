@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using InventoryManagement_Backend.Services;
 
 
-namespace YourProjectNamespace.Controllers
+namespace InventoryManagement_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
