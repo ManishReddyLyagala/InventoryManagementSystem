@@ -47,7 +47,15 @@ namespace InventoryManagement_Backend.Services
             var CreatedOrders = new List<PurchaseSalesOrders>();
 
             foreach (var item in orderRequest.Items) {
-                
+                if (item.ProductId <= 0)
+                    throw new ArgumentException($"Invalid ProductId for one of the items. ProductId: {item.ProductId}");
+
+                if (item.Quantity <= 0)
+                    throw new ArgumentException($"Quantity must be greater than 0 for ProductId {item.ProductId}");
+
+                if (item.TotalAmount < 0)
+                    throw new ArgumentException($"TotalAmount cannot be negative for ProductId {item.ProductId}");
+
                 var order = new PurchaseSalesOrders
                 {
                     TransactionId = orderRequest.TransactionId,
@@ -55,8 +63,8 @@ namespace InventoryManagement_Backend.Services
                     Quantity = item.Quantity,
                     TotalAmount = item.TotalAmount,
                     OrderType = orderRequest.OrderType,
-                    SupplierId =   orderRequest.SupplierId,
-                    CustomerId =   orderRequest.CustomerId,
+                    SupplierId =   orderRequest.SupplierId!=0 ? orderRequest.SupplierId: null,
+                    CustomerId =   orderRequest.CustomerId!=0 ? orderRequest.CustomerId: null,
                     OrderDate = DateTime.UtcNow
                 };
                 _context.PurchaseOrders.Add(order);
@@ -182,6 +190,7 @@ namespace InventoryManagement_Backend.Services
                     TotalAmount = (decimal?)g.Sum(o=>o.TotalAmount) ?? 0
                 }).ToListAsync();
         }
+
         
     }
 }
