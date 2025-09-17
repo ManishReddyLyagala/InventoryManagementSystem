@@ -68,6 +68,56 @@ namespace InventoryManagement_Backend.Controllers
             var transactions = await _transactionService.FilterAsync(typeChar, date, customerId, supplierId);
             return Ok(transactions);
         }
+        [HttpGet("daily")]
+        public async Task<IActionResult> GetDailyReport()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            var (Purchases,  Sales,  noOfpurchases,  noOfsales) = await _transactionService.GetDailyReportAsync(today);
+
+            var report = new
+            {
+                Date = today.ToString("yyyy-MM-dd"),
+                TotalPurchases = Purchases,
+                TotalSales = Sales,
+                noOfpurchases = noOfpurchases,
+                noOfsales = noOfsales
+            };
+
+            return Ok(report);
+        }
+
+        [HttpGet("monthly")]
+        public async Task<IActionResult> GetMonthlyReport([FromQuery] int? year, [FromQuery] int? month)
+        {
+            var y = year ?? DateTime.UtcNow.Year;
+            var m = month ?? DateTime.UtcNow.Month;
+
+            var report = await _transactionService.GetMonthlyReportAsync(y, m);
+
+            return Ok(new
+            {
+                Year = y,
+                Month = m,
+                Breakdown = report
+            });
+        }
+
+        [HttpGet("reports/yearly/{year}")]
+        public async Task<IActionResult> GetYearlyReport(int year)
+        {
+            try
+            {
+                var report = await _transactionService.GetYearlyReportAsync(year);
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
 
     }
 }

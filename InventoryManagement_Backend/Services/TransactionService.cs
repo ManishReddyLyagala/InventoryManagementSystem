@@ -34,9 +34,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<Transaction?> GetByIdAsync(int id)
         {
             return await _context.Transactions
-                .Include(t => t.Supplier)
-                .Include(t => t.Customer)
-                .Include(t => t.PurchaseOrders)
+
                 .FirstOrDefaultAsync(t => t.TransactionId == id);
         }
 
@@ -74,8 +72,6 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<Transaction>> FilterAsync(char? type, DateTime? date, int? customerId, int? supplierId)
         {
             var query = _context.Transactions
-                .Include(t => t.Customer)
-                .Include(t => t.Supplier)
                 .Include(t => t.PurchaseOrders)
                 .AsQueryable();
 
@@ -93,5 +89,88 @@ namespace InventoryManagement_Backend.Services
             return await query.ToListAsync();
             
         }
+
+        public async Task<(decimal Purchases, decimal Sales, decimal NoOfPurchases, decimal NoOfSales)> GetDailyReportAsync(DateTime date)
+        {
+            var purchases = await _context.Transactions
+                .Where(t => t.Type == 'P' && t.DateTime.Date == date.Date)
+                .SelectMany(t => t.PurchaseOrders)
+                .SumAsync(po => (decimal?)po.TotalAmount ?? 0);
+
+            var sales = await _context.Transactions
+                .Where(t => t.Type == 'S' && t.DateTime.Date == date.Date)
+                .SelectMany(t => t.PurchaseOrders)
+                .SumAsync(so => (decimal?)so.TotalAmount ?? 0);
+
+            var noOfpurchases = await _context.Transactions
+                .CountAsync(t => t.Type == 'P' && t.DateTime.Date == date.Date);
+
+            var noOfsales = await _context.Transactions
+                .CountAsync(t => t.Type == 'S' && t.DateTime.Date == date.Date);
+
+            return (purchases, sales, noOfpurchases, noOfsales);
+        }
+
+        public async Task<IEnumerable<object>> GetMonthlyReportAsync(int year, int month)
+        {
+            try
+            {
+                var startDate = new DateTime(year, month, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var report = await _context.Transactions
+                    .Where(t => t.DateTime >= startDate && t.DateTime <= endDate)
+                    .GroupBy(t => t.DateTime.Date)
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        Purchases = g.Where(t => t.Type == 'P')
+                                     .SelectMany(t => t.PurchaseOrders)
+                                     .Sum(po => (decimal?)po.TotalAmount ?? 0),
+
+                        Sales = g.Where(t => t.Type == 'S')
+                                 .SelectMany(t => t.PurchaseOrders) 
+                                 .Sum(so => (decimal?)so.TotalAmount ?? 0),
+
+                        NoOfPurchases = g.Count(t => t.Type == 'P'),
+                        NoOfSales = g.Count(t => t.Type == 'S')
+                    })
+                    .OrderBy(r => r.Date)
+                    .ToListAsync();
+
+                return report;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while generating monthly report: {ex.Message}");
+                return Enumerable.Empty<object>();
+            }
+
+        }
+
+        public async Task<IEnumerable<object>> GetYearlyReportAsync(int year)
+        {
+            var report = await _context.Transactions
+                .Where(t => t.DateTime.Year == year)0
+                .GroupBy(t => new { t.DateTime.Month, t.Type })
+                .Select(g => new
+                {
+                    Month = g.Key.Month,
+                    Type = g.Key.Type,
+                    TotalAmount = g.Sum(t =>
+                        t.Type == 'P'
+                            ? t.PurchaseOrders.Sum(po => po.TotalAmount)
+                            : t.PurchaseOrders.Sum(so => so.TotalAmount)),
+                    Count = g.Count()
+                })
+                .OrderBy(r => r.Month)
+                .ToListAsync();
+
+            return report;
+        }
+
+
+
+
     }
 }

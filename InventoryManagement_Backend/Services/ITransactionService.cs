@@ -15,7 +15,11 @@ namespace InventoryManagement_Backend.Services.Interfaces
             DateTime? date,
             int? customerId,
             int? supplierId);
-    }
 
-    
+
+      Task<(decimal Purchases, decimal Sales, decimal NoOfPurchases, decimal NoOfSales)> GetDailyReportAsync(DateTime date);
+       Task<IEnumerable<object>> GetMonthlyReportAsync(int year, int month);
+        Task<IEnumerable<object>> GetYearlyReportAsync(int year);
+
+    }
 }
