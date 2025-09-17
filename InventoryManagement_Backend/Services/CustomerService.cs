@@ -59,7 +59,7 @@ namespace InventoryManagement_Backend.Services
         {
             var customer = await _context.Customers
                 .Include(c => c.Transactions)
-                    .ThenInclude(t => t.PurchaseOrders)
+                    .ThenInclude(t => t.PurchaseSalesOrders)
                         .ThenInclude(po => po.Product)
                             .ThenInclude(t => t.Supplier)
                 .FirstOrDefaultAsync(c => c.CustomerId == id);
@@ -79,7 +79,7 @@ namespace InventoryManagement_Backend.Services
                     DateTime = t.DateTime,
                     SupplierId = t.SupplierId,
 
-                    Orders = t.PurchaseOrders.Select(po => new PurchaseSalesOrderDto
+                    Orders = t.PurchaseSalesOrders.Select(po => new PurchaseSalesOrderDto
                     {
                         OrderId = po.OrderId,
                         TransactionId = po.TransactionId,

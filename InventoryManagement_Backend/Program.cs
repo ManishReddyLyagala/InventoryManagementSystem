@@ -1,10 +1,11 @@
-using InventoryManagement_Backend.Data;
-using InventoryManagement_Backend.Services;
-using Microsoft.EntityFrameworkCore;
-using InventoryManagement_Backend.Settings;
-using Microsoft.Extensions.Options;
 using Hangfire;
 using Hangfire.SqlServer;
+using InventoryManagement_Backend.Data;
+using InventoryManagement_Backend.Services;
+using InventoryManagement_Backend.Services.Interfaces;
+using InventoryManagement_Backend.Settings;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,9 +36,9 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 //// Register services
 builder.Services.AddScoped<ISupplierService, SupplierService>();
-
-
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+//builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 //builder.Services.AddScoped<IProductService, ProductService>();
 //builder.Services.AddScoped<ITransactionService, TransactionService>();
