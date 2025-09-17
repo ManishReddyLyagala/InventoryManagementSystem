@@ -35,6 +35,8 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 //// Register services
 builder.Services.AddScoped<ISupplierService, SupplierService>();
+
+
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 //builder.Services.AddScoped<IProductService, ProductService>();
@@ -58,6 +60,7 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
+
 app.UseCors("InventoryOrigin");
 
 if (app.Environment.IsDevelopment())
@@ -65,9 +68,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors("AllowAngularDev");
-
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
