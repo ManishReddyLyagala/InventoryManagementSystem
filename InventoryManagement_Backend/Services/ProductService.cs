@@ -220,7 +220,7 @@ namespace InventoryManagement_Backend.Services
             var dtoProducts = products.Select(p => map(p)).ToList();
 
             return new
-            {
+    {
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalPages = totalPages,

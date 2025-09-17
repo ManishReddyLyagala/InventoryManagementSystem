@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManagement_Backend.Models
 {
-    public class PurchaseOrder
+    public class PurchaseSalesOrders
     {
         [Key]
-        public int SalesId { get; set; }
+        public int OrderId { get; set; }
 
         [Required]
         public int TransactionId { get; set; }
@@ -23,15 +23,15 @@ namespace InventoryManagement_Backend.Models
         [Range(0.01, double.MaxValue, ErrorMessage = "TotalAmount must be greater than 0.")]
         public decimal TotalAmount { get; set; }
 
-        //[Required]
-        //[RegularExpression("^(S|P)$", ErrorMessage = "OrderType must be either 'Sales' or 'Purchase'.")]
-        //public string OrderType { get; set; } // "S" or "P"
+        [Required]
+        [RegularExpression("^(S|P)$", ErrorMessage = "OrderType must be either 'Sales' or 'Purchase'.")]
+        public string OrderType { get; set; } // "S" or "P"
 
-        //public int? SupplierId { get; set; }
-        //public int? CustomerId { get; set; }
+        public int? SupplierId { get; set; }
+        public int? CustomerId { get; set; }
 
-        //[Required]
-        //public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        [Required]
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
         public Product Product { get; set; }
