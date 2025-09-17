@@ -22,6 +22,7 @@ namespace InventoryManagement_Backend.Models
         public int Quantity { get; set; } = 0;
         [MaxLength(255)]
         public string? ImageUrl { get; set; }
+        public Decimal  Price { get; set; }
 
         // FK
         public int SupplierId { get; set; }

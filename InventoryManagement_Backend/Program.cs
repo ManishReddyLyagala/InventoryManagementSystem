@@ -1,5 +1,5 @@
 using InventoryManagement_Backend.Data;
-//using InventoryManagement_Backend.Services;
+using InventoryManagement_Backend.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,10 +20,10 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //// Register services
-//builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
-//builder.Services.AddScoped<IProductService, ProductService>();
-//builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 var app = builder.Build();
 

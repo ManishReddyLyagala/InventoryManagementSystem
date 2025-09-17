@@ -7,23 +7,36 @@ namespace InventoryManagement_Backend.Models
     public class PurchaseOrder
     {
         [Key]
-        public int SalesId { get; set; } // detail id (line id)
+        public int SalesId { get; set; }
 
         [Required]
         public int TransactionId { get; set; }
-        public Transaction Transaction { get; set; } = null!;
 
         [Required]
         public int ProductId { get; set; }
-        public Product Product { get; set; } = null!;
 
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public int Quantity { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        [Range(0, double.MaxValue)]
+        [Range(0.01, double.MaxValue, ErrorMessage = "TotalAmount must be greater than 0.")]
         public decimal TotalAmount { get; set; }
+
+        //[Required]
+        //[RegularExpression("^(S|P)$", ErrorMessage = "OrderType must be either 'Sales' or 'Purchase'.")]
+        //public string OrderType { get; set; } // "S" or "P"
+
+        //public int? SupplierId { get; set; }
+        //public int? CustomerId { get; set; }
+
+        //[Required]
+        //public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+
+        // Navigation Properties
+        public Product Product { get; set; }
+        public Supplier Supplier { get; set; }
+        public Customer Customer { get; set; }
+        public Transaction Transaction { get; set; }
     }
 }
