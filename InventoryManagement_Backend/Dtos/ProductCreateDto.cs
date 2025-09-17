@@ -23,7 +23,8 @@
         public Decimal Price { get; set; }
         public int SupplierId { get; set; }
         public string Supplier_Name { get; set; }
-        public string Contact { get; set; }
+        public string MobileNumber { get; set; }
+        public string EmailId {  get; set; }
 
     }
     public class Low_High_Stocks

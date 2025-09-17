@@ -10,12 +10,12 @@ namespace InventoryManagement_Backend.Services
     public class ProductService:IProductService
     {
 
-        public event EventHandler<Lowstock_Event_defining> onLowstock;
-
         private readonly InventoryDbContext _context;
-        public ProductService(InventoryDbContext context)
+        private readonly IStockAlertService _stockAlertService;
+        public ProductService(InventoryDbContext context, IStockAlertService stockAlertService)
         {
             _context = context;
+            _stockAlertService = stockAlertService;
         }
         public async Task<IList<ProductCreateDto>> get_all_products()
         {
@@ -44,7 +44,7 @@ namespace InventoryManagement_Backend.Services
             await _context.SaveChangesAsync();
             if (product.Quantity < 10)
             {
-                onLowstock?.Invoke(this, new Lowstock_Event_defining(product));
+                await _stockAlertService.SendDailyLowStockEmailAsync(10);
             }
             return product.ProductId;
         }
@@ -65,7 +65,8 @@ namespace InventoryManagement_Backend.Services
                 Price  =    product.Price,
                 SupplierId = product.SupplierId,
                 Supplier_Name = product.Supplier.Name,
-                Contact=product.Supplier.Contact
+                MobileNumber=product.Supplier.MobileNumber,
+                EmailId=product.Supplier.EmailID
             };
             return p_s;
         }
@@ -98,11 +99,11 @@ namespace InventoryManagement_Backend.Services
             int quantity = product.Quantity+inc_dec;
             if (quantity < 0) return false;
             product.Quantity = quantity;
-            if(product.Quantity<10)
-            {
-                onLowstock?.Invoke(this, new Lowstock_Event_defining(product));
-            }
             await _context.SaveChangesAsync();
+            if (product.Quantity < 10)
+            {
+                await _stockAlertService.SendDailyLowStockEmailAsync(10);
+            }
             return true;
         }
 
@@ -118,7 +119,7 @@ namespace InventoryManagement_Backend.Services
             product.Quantity=new_product.Quantity;
             if (product.Quantity < 10)
             {
-                onLowstock?.Invoke(this, new Lowstock_Event_defining(product));
+                await _stockAlertService.SendDailyLowStockEmailAsync(10);
             }
             product.Price=new_product.Price;
             if(product.SupplierId!=new_product.SupplierId)
