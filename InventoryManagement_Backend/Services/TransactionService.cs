@@ -72,7 +72,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<Transaction>> FilterAsync(char? type, DateTime? date, int? customerId, int? supplierId)
         {
             var query = _context.Transactions
-                .Include(t => t.PurchaseOrders)
+                .Include(t => t.PurchaseSalesOrders)
                 .AsQueryable();
 
             if (type.HasValue)
@@ -94,12 +94,12 @@ namespace InventoryManagement_Backend.Services
         {
             var purchases = await _context.Transactions
                 .Where(t => t.Type == 'P' && t.DateTime.Date == date.Date)
-                .SelectMany(t => t.PurchaseOrders)
+                .SelectMany(t => t.PurchaseSalesOrders)
                 .SumAsync(po => (decimal?)po.TotalAmount ?? 0);
 
             var sales = await _context.Transactions
                 .Where(t => t.Type == 'S' && t.DateTime.Date == date.Date)
-                .SelectMany(t => t.PurchaseOrders)
+                .SelectMany(t => t.PurchaseSalesOrders)
                 .SumAsync(so => (decimal?)so.TotalAmount ?? 0);
 
             var noOfpurchases = await _context.Transactions
@@ -125,11 +125,11 @@ namespace InventoryManagement_Backend.Services
                     {
                         Date = g.Key,
                         Purchases = g.Where(t => t.Type == 'P')
-                                     .SelectMany(t => t.PurchaseOrders)
+                                     .SelectMany(t => t.PurchaseSalesOrders)
                                      .Sum(po => (decimal?)po.TotalAmount ?? 0),
 
                         Sales = g.Where(t => t.Type == 'S')
-                                 .SelectMany(t => t.PurchaseOrders) 
+                                 .SelectMany(t => t.PurchaseSalesOrders) 
                                  .Sum(so => (decimal?)so.TotalAmount ?? 0),
 
                         NoOfPurchases = g.Count(t => t.Type == 'P'),
@@ -151,7 +151,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<object>> GetYearlyReportAsync(int year)
         {
             var report = await _context.Transactions
-                .Where(t => t.DateTime.Year == year)0
+                .Where(t => t.DateTime.Year == year)
                 .GroupBy(t => new { t.DateTime.Month, t.Type })
                 .Select(g => new
                 {
@@ -159,8 +159,8 @@ namespace InventoryManagement_Backend.Services
                     Type = g.Key.Type,
                     TotalAmount = g.Sum(t =>
                         t.Type == 'P'
-                            ? t.PurchaseOrders.Sum(po => po.TotalAmount)
-                            : t.PurchaseOrders.Sum(so => so.TotalAmount)),
+                            ? t.PurchaseSalesOrders.Sum(po => po.TotalAmount)
+                            : t.PurchaseSalesOrders.Sum(so => so.TotalAmount)),
                     Count = g.Count()
                 })
                 .OrderBy(r => r.Month)

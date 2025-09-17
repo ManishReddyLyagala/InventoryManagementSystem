@@ -5,6 +5,7 @@ using InventoryManagement_Backend.Settings;
 using Microsoft.Extensions.Options;
 using Hangfire;
 using Hangfire.SqlServer;
+using InventoryManagement_Backend.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
