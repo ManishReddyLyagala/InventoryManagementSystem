@@ -13,8 +13,6 @@ namespace InventoryManagement_Backend.Models
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public long Mobile_Number { get; set; }
-
         [MaxLength(50)]
         public string? Email { get; set; }
 
