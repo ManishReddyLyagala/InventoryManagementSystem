@@ -89,16 +89,29 @@ namespace InventoryManagement_Backend.Migrations
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseOrder", b =>
                 {
-                    b.Property<int>("SalesId")
+                    b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalesId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
@@ -107,9 +120,13 @@ namespace InventoryManagement_Backend.Migrations
                     b.Property<int>("TransactionId")
                         .HasColumnType("int");
 
-                    b.HasKey("SalesId");
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("SupplierId");
 
                     b.HasIndex("TransactionId");
 
@@ -195,11 +212,19 @@ namespace InventoryManagement_Backend.Migrations
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseOrder", b =>
                 {
+                    b.HasOne("InventoryManagement_Backend.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
                     b.HasOne("InventoryManagement_Backend.Models.Product", "Product")
                         .WithMany("PurchaseOrders")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("InventoryManagement_Backend.Models.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId");
 
                     b.HasOne("InventoryManagement_Backend.Models.Transaction", "Transaction")
                         .WithMany("PurchaseOrders")
@@ -207,7 +232,11 @@ namespace InventoryManagement_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Customer");
+
                     b.Navigation("Product");
+
+                    b.Navigation("Supplier");
 
                     b.Navigation("Transaction");
                 });

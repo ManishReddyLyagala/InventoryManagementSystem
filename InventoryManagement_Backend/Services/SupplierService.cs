@@ -25,27 +25,27 @@ namespace InventoryManagement_Backend.Services
                     MobileNumber = s.MobileNumber,
                     EmailID = s.EmailID,
                     ProductCategory = s.ProductCategory,
-                    Products = s.Products.Select(p => new ProductReadDto
-                    {
-                        ProductId = p.ProductId,
-                        Name = p.Name,
-                        Category = p.Category ?? string.Empty,
-                        Description = p.Description ?? string.Empty,
-                        Quantity = p.Quantity,
-                        ImageUrl = p.ImageUrl ?? string.Empty
-                    }).ToList()
+                    //Products = s.Products.Select(p => new ProductReadDto
+                    //{
+                    //    ProductId = p.ProductId,
+                    //    Name = p.Name,
+                    //    Category = p.Category ?? string.Empty,
+                    //    Description = p.Description ?? string.Empty,
+                    //    Quantity = p.Quantity,
+                    //    ImageUrl = p.ImageUrl ?? string.Empty
+                    //}).ToList()
                 })
                 .AsNoTracking()
                 .ToListAsync();
         }
 
 
-        public async Task<SupplierReadDto?> GetByIdAsync(int id)
+        public async Task<SupplierbyIDReadDto?> GetByIdAsync(int id)
         {
             return await _context.Suppliers
                 .Where(s => s.SupplierId == id)
                 .Include(s => s.Products)  // eager load products
-                .Select(s => new SupplierReadDto
+                .Select(s => new SupplierbyIDReadDto
                 {
                     SupplierId = s.SupplierId,
                     Name = s.Name,
@@ -59,7 +59,8 @@ namespace InventoryManagement_Backend.Services
                         Category = p.Category,
                         Description = p.Description,
                         Quantity = p.Quantity,
-                        ImageUrl = p.ImageUrl
+                        ImageUrl = p.ImageUrl,
+                        //SupplierId = p.SupplierId
                     }).ToList()
                 })
                 .AsNoTracking()

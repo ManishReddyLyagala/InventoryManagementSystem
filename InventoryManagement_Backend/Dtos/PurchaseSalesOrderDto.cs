@@ -1,4 +1,6 @@
-﻿namespace InventoryManagement_Backend.Dtos
+﻿using InventoryManagement_Backend.Models;
+
+namespace InventoryManagement_Backend.Dtos
 {
     public class OrderCreateRequest
     {

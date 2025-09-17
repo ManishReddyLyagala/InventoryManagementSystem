@@ -2,8 +2,17 @@
 
 namespace InventoryManagement_Backend.Dtos
 {
-    // For reading/displaying supplier data
+
     public class SupplierReadDto
+    {
+        public int SupplierId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public long MobileNumber { get; set; }
+        public string EmailID { get; set; } = string.Empty;
+        public string ProductCategory { get; set; } = string.Empty;
+    }
+    // For reading/displaying supplier data
+    public class SupplierbyIDReadDto
     {
         public int SupplierId { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -16,11 +25,12 @@ namespace InventoryManagement_Backend.Dtos
     public class ProductReadDto
     {
         public int ProductId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
+        public string? Name { get; set; } = string.Empty;
+        public string? Category { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
+        //public int SupplierId { get; set; }
     }
 
     // For creating a supplier (client should NOT send SupplierId)
