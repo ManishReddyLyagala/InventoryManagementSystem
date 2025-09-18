@@ -2,13 +2,16 @@
 using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryManagement_Backend.Controllers
 {
+   
     [Route("api/[controller]")]
     [ApiController]
     public class PurchaseOrdersController : ControllerBase
@@ -17,11 +20,13 @@ namespace InventoryManagement_Backend.Controllers
 
         private readonly IPurchaseSalesOrdersService _service;
         private readonly InventoryDbContext _dbContext;
+        private readonly IInvoiceEmailService _invoiceEmailService;
 
-        public PurchaseOrdersController(IPurchaseSalesOrdersService service, InventoryDbContext dbContext)
+        public PurchaseOrdersController(IPurchaseSalesOrdersService service, InventoryDbContext dbContext, IInvoiceEmailService invoiceEmailService)
         {
             _service = service;
             _dbContext = dbContext;
+            _invoiceEmailService = invoiceEmailService;
         }
 
         private PurchaseSalesOrderDto MapToDto(PurchaseSalesOrders order)
@@ -35,11 +40,11 @@ namespace InventoryManagement_Backend.Controllers
                 TotalAmount = order.TotalAmount,
                 OrderType = order.OrderType,
                 SupplierId = order.SupplierId,
-                CustomerId = order.CustomerId,
+                UserId = order.UserId,
                 OrderDate = order.OrderDate,
                 ProductName = order.Product?.Name,
                 SupplierName = order.Supplier?.Name,
-                CustomerName = order.Customer?.Name
+                CustomerName = order.User?.Name
             };
         }
 
@@ -54,11 +59,12 @@ namespace InventoryManagement_Backend.Controllers
                 TotalAmount = orderDto.TotalAmount,
                 OrderType = orderDto.OrderType,
                 SupplierId = orderDto.SupplierId,
-                CustomerId = orderDto.CustomerId,
+                UserId = orderDto.UserId,
                 OrderDate = orderDto.OrderDate
             };
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet] // GET: api/PurchaseSalesOrders
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetAllOrders()
         {
@@ -76,6 +82,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("id")] // GET: api/PurchaseSalesOrders/{id}
         public async Task<ActionResult<PurchaseSalesOrderDto>> GetOrderById(int id)
         {
@@ -97,6 +104,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("CreateOrder")]
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> CreateOrder(OrderCreateRequest orderRequest)
         {
@@ -104,20 +112,44 @@ namespace InventoryManagement_Backend.Controllers
             if (orderRequest == null)
                 return BadRequest("Request body cannot be null");
 
-            if (!((orderRequest.OrderType == "P" && orderRequest.SupplierId > 0 && (orderRequest.CustomerId == null || orderRequest.CustomerId <= 0)) ||
-       (orderRequest.OrderType == "S" && orderRequest.CustomerId > 0 && (orderRequest.SupplierId == null || orderRequest.SupplierId <= 0))))
+            if (!((orderRequest.OrderType == "P" && orderRequest.SupplierId > 0 && (orderRequest.UserId == null || orderRequest.UserId <= 0)) ||
+       (orderRequest.OrderType == "S" && orderRequest.UserId > 0 && (orderRequest.SupplierId == null || orderRequest.SupplierId <= 0))))
             {
                 return BadRequest("OrderType and Supplier/Customer Id missmatch. recheck");
             }
             if (orderRequest.Items == null || !orderRequest.Items.Any())
                 return BadRequest("At least one product item must be included in the order.");
-            
+
+            // transaction should be callled
+                var transaction = await _dbContext.Transactions.FindAsync(orderRequest.TransactionId);
+                var customer = orderRequest.UserId.HasValue
+                                ? await _dbContext.User.FindAsync(orderRequest.UserId.Value)
+                                : null;
+                var supplier = orderRequest.SupplierId.HasValue
+                                ? await _dbContext.Suppliers.FindAsync(orderRequest.SupplierId.Value)
+                                : null;
+                if (!(transaction!=null && (customer!=null || supplier!=null)))
+                {
+                    return BadRequest("Invalid Id's detals missmatch.");
+                }
+
                 var createdOrders = await _service.CreateOrderAsync(orderRequest);
 
                 if (createdOrders == null || !createdOrders.Any())
                     return BadRequest("Failed to create order. Please check product details.");
+                // should dec quantity
 
                 var result = createdOrders.Select(o => MapToDto(o));
+                
+
+                var productIds = createdOrders.Select(o => o.ProductId).ToList();
+                var products = await _dbContext.Products
+                                    .Where(p => productIds.Contains(p.ProductId))
+                                    .ToListAsync();
+
+                // Send Invoice Email (one email with multiple products)
+                await _invoiceEmailService.SendOrderInvoiceEmailAsync(customer, supplier, createdOrders, transaction, products);
+
 
                 return Ok(result);
             }
@@ -127,6 +159,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("type/{type}")]
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetOrderByType(string type)
         {
@@ -151,6 +184,7 @@ namespace InventoryManagement_Backend.Controllers
            
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult<PurchaseSalesOrderDto>> UpdateOrders(int id, PurchaseSalesOrderDto orderDto)
         {
@@ -180,8 +214,8 @@ namespace InventoryManagement_Backend.Controllers
                 {
                     return BadRequest("Date/Time should be current time.");
                 }
-                if (!((orderDto.OrderType == "P" && orderDto.SupplierId > 0 && (orderDto.CustomerId == null || orderDto.CustomerId <= 0)) ||
-                        (orderDto.OrderType == "S" && orderDto.CustomerId > 0 && (orderDto.SupplierId == null || orderDto.SupplierId <= 0))))
+                if (!((orderDto.OrderType == "P" && orderDto.SupplierId > 0 && (orderDto.UserId == null || orderDto.UserId <= 0)) ||
+                        (orderDto.OrderType == "S" && orderDto.UserId > 0 && (orderDto.SupplierId == null || orderDto.SupplierId <= 0))))
                 {
                     return BadRequest("OrderType and Supplier/Customer Id missmatch. recheck");
                 }
@@ -195,7 +229,7 @@ namespace InventoryManagement_Backend.Controllers
                 }
                 else
                 {
-                    var customerDetails = await _dbContext.Customers.FindAsync(orderDto.CustomerId);
+                    var customerDetails = await _dbContext.User.FindAsync(orderDto.UserId);
                     if (customerDetails == null)
                     {
                         return NotFound("Customer with this id not found");
@@ -214,6 +248,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<bool>> DeleteOrder(int id)
         {
@@ -234,7 +269,7 @@ namespace InventoryManagement_Backend.Controllers
         }
 
         // ANALYTICS
-
+        [Authorize]
         [HttpGet("analytics/totalsales")]
         public async Task<ActionResult<decimal>> GetTotalSales()
         {
@@ -247,6 +282,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/totalpurchases")]
         public async Task<ActionResult<decimal>> GetTotalPurchases()
         {
@@ -260,6 +296,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/profits")]
         public async Task<ActionResult<decimal>> GetProfits()
         {
@@ -273,6 +310,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/monthly/{year}")]
         public async Task<ActionResult<IEnumerable<object>>> GetMothlyReport([Range(2000, 3000)] int year)
         {
@@ -287,6 +325,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/yearly")]
         public async Task<ActionResult<IEnumerable<object>>> GetYearlyReport()
         {
@@ -300,6 +339,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/LastSevenDays")]
         public async Task<ActionResult<IEnumerable<object>>> GetWeeklyReport()
         {
@@ -313,6 +353,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/today")]
         public async Task<ActionResult<IEnumerable<object>>> GetTodayReport()
         {
@@ -326,6 +367,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("analytics/custom")]
         public async Task<ActionResult<IEnumerable<object>>> GetCustomDatesReport(DateTime startDate, DateTime endDate)
         {

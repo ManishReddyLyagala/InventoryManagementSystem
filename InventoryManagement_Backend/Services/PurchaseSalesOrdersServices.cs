@@ -21,25 +21,25 @@ namespace InventoryManagement_Backend.Services
 
         // ========== CRUD ==========
         public async Task<IEnumerable<PurchaseSalesOrders>> GetAllAsync() =>
-            await _context.PurchaseOrders
+            await _context.PurchaseSalesOrders
                 .Include(p => p.Product)
                 .Include(p => p.Supplier)
-                .Include(p => p.Customer)
+                .Include(p => p.User)
                 .ToListAsync();
 
         public async Task<PurchaseSalesOrders?> GetByIdAsync(int id) =>
-            await _context.PurchaseOrders
+            await _context.PurchaseSalesOrders
                 .Include(p => p.Product)
                 .Include(p => p.Supplier)
-                .Include(p => p.Customer)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
         public async Task<IEnumerable<PurchaseSalesOrders>> GetByTypeAsync(string type) =>
-            await _context.PurchaseOrders
+            await _context.PurchaseSalesOrders
                 .Where(o => o.OrderType == type)
                 .Include(p => p.Product)
                 .Include(p => p.Supplier)
-                .Include(p => p.Customer)
+                .Include(p => p.User)
                 .ToListAsync();
 
         public async Task<List<PurchaseSalesOrders>> CreateOrderAsync(OrderCreateRequest orderRequest)
@@ -64,10 +64,10 @@ namespace InventoryManagement_Backend.Services
                     TotalAmount = item.TotalAmount,
                     OrderType = orderRequest.OrderType,
                     SupplierId =   orderRequest.SupplierId!=0 ? orderRequest.SupplierId: null,
-                    CustomerId =   orderRequest.CustomerId!=0 ? orderRequest.CustomerId: null,
+                    UserId =   orderRequest.UserId!=0 ? orderRequest.UserId: null,
                     OrderDate = DateTime.UtcNow
                 };
-                _context.PurchaseOrders.Add(order);
+                _context.PurchaseSalesOrders.Add(order);
                 CreatedOrders.Add(order);
             }
             await _context.SaveChangesAsync();
@@ -77,7 +77,7 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<PurchaseSalesOrders?> UpdateAsync(int id, PurchaseSalesOrderDto order)
         {
-            var existing = await _context.PurchaseOrders.FindAsync(id);
+            var existing = await _context.PurchaseSalesOrders.FindAsync(id);
             if (existing == null) return null;
 
             existing.TransactionId = order.TransactionId;
@@ -86,7 +86,7 @@ namespace InventoryManagement_Backend.Services
             existing.TotalAmount = order.TotalAmount;
             existing.OrderType = order.OrderType;
             existing.SupplierId = order.SupplierId;
-            existing.CustomerId = order.CustomerId;
+            existing.UserId = order.UserId;
             existing.OrderDate = order.OrderDate;
 
             await _context.SaveChangesAsync();
@@ -95,22 +95,22 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var order = await _context.PurchaseOrders.FindAsync(id);
+            var order = await _context.PurchaseSalesOrders.FindAsync(id);
             if (order == null) return false;
 
-            _context.PurchaseOrders.Remove(order);
+            _context.PurchaseSalesOrders.Remove(order);
             await _context.SaveChangesAsync();
             return true;
         }
 
         // ========== Analytics ==========
         public async Task<decimal> GetTotalSalesAsync() =>
-            await _context.PurchaseOrders
+            await _context.PurchaseSalesOrders
                 .Where(o => o.OrderType == "S")
                 .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
 
         public async Task<decimal> GetTotalPurchasesAsync() =>
-            await _context.PurchaseOrders
+            await _context.PurchaseSalesOrders
                 .Where(o => o.OrderType == "P")
                 .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
 
@@ -123,7 +123,7 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<IEnumerable<object>> GetMonthlyTrendsAsync(int year)
         {
-            return await _context.PurchaseOrders
+            return await _context.PurchaseSalesOrders
                 .Where(o => o.OrderDate.Year == year)
                 .GroupBy(o => new { o.OrderDate.Month, o.OrderType })
                 .Select(g => new
@@ -138,7 +138,7 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<IEnumerable<object>> GetYearlyTrendsAsync()
         {
-            return await _context.PurchaseOrders
+            return await _context.PurchaseSalesOrders
                 .GroupBy(o => new { o.OrderDate.Year, o.OrderType })
                 .Select(g => new
                 {
@@ -153,7 +153,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<object>> GetWeeklyTrendsAsync()
         {
             var weekStartDate = DateTime.UtcNow.Date.AddDays(-7);
-            return await _context.PurchaseOrders.Where(o => o.OrderDate >= weekStartDate)
+            return await _context.PurchaseSalesOrders.Where(o => o.OrderDate >= weekStartDate)
                 .GroupBy(o => new { o.OrderType })
                 .Select(g => new
                 {
@@ -166,7 +166,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<object>> GetTodayTrendsAsync()
         {
             var today = DateTime.UtcNow.Date;
-            return await _context.PurchaseOrders.Where(o => o.OrderDate == today)
+            return await _context.PurchaseSalesOrders.Where(o => o.OrderDate == today)
                 .GroupBy(o => o.OrderType )
                 .Select(g => new
                 {
@@ -179,7 +179,7 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<IEnumerable<object>> GetCustomTrendsAsync(DateTime startDate, DateTime endDate)
         {
-            return await _context.PurchaseOrders.Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
+            return await _context.PurchaseSalesOrders.Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
                 .GroupBy(o => o.OrderType)
                 .Select(g => new
                 {
