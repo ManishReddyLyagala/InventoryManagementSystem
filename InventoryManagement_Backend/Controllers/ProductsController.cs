@@ -15,104 +15,283 @@ namespace InventoryManagement_Backend.Controllers
         {
             _productservice = productservices;
         }
+
         [HttpGet]
         public async Task<ActionResult<IList<ProductCreateDto>>> getproducts()
         {
-            var products = await _productservice.get_all_products();
-            if (products == null)
+            try
             {
-                return NotFound("NO Products");
+                var products = await _productservice.get_all_products();
+                if (products == null || !products.Any())
+                {
+                    return NotFound("No products found");
+                }
+                return Ok(products);
             }
-            return Ok(products);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
         [HttpPost]
-        public async Task<ActionResult<string>> addproduct(ProductCreateDto new_product)
+        public async Task<ActionResult<string>> addproduct([FromBody] ProductCreateDto new_product)
         {
-            int supplier_exist = await _productservice.add_product(new_product);
-            if (supplier_exist == -1)
+            try
             {
-                return NotFound("Supplier Id does not exists");
+                if (new_product == null)
+                    return BadRequest("Product cannot be null");
+
+                if (new_product.ProductId < 0)
+                    return BadRequest("ProductId cannot be negative");
+
+                if (string.IsNullOrWhiteSpace(new_product.Name))
+                    return BadRequest("Product name is required");
+
+                if (string.IsNullOrWhiteSpace(new_product.Category))
+                    return BadRequest("Category is required");
+
+                if (string.IsNullOrWhiteSpace(new_product.Description))
+                    return BadRequest("Description is required");
+
+                if (new_product.Quantity < 0)
+                    return BadRequest("Quantity cannot be negative");
+
+                if (!string.IsNullOrWhiteSpace(new_product.ImageUrl) &&
+                    !Uri.IsWellFormedUriString(new_product.ImageUrl, UriKind.Absolute))
+                {
+                    return BadRequest("ImageUrl must be a valid URL");
+                }
+
+                if (new_product.Price <= 0)
+                    return BadRequest("Price must be greater than 0");
+
+                if (new_product.SupplierId <= 0)
+                    return BadRequest("SupplierId is required and must be positive");
+
+                int supplier_exist = await _productservice.add_product(new_product);
+                if (supplier_exist == -1)
+                {
+                    return NotFound("Supplier Id does not exist");
+                }
+
+                return CreatedAtAction(nameof(get_productby_id), new { id = supplier_exist }, "Added successfully");
             }
-            return CreatedAtAction(nameof(get_productby_id), new { id = supplier_exist }, "Added successfully");
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult<product_supplier>> get_productby_id(int id)
         {
-            var product_supplier = await _productservice.get_productby_id(id);
-            if (product_supplier == null)
+            try
             {
-                return NotFound("Product not found");
+                if (id <= 0) return BadRequest("Invalid product id");
+
+                var product_supplier = await _productservice.get_productby_id(id);
+                if (product_supplier == null)
+                {
+                    return NotFound("Product not found");
+                }
+                return Ok(product_supplier);
             }
-            return Ok(product_supplier);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}/quantity")]
         public async Task<ActionResult<int>> get_qunatity(int id)
         {
-            var quantity = await _productservice.get_quantity(id);
-            if (quantity == -1) return NotFound("product doesnot exists");
-            return Ok(quantity);
+            try
+            {
+                if (id <= 0) return BadRequest("Invalid product id");
+
+                var quantity = await _productservice.get_quantity(id);
+                if (quantity == -1) return NotFound("Product does not exist");
+                return Ok(quantity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<string>> del_product(int id)
         {
-            bool b = await _productservice.del_product(id);
-            if (b)
+            try
             {
-                return "Deleted sucessfully";
+                if (id <= 0) return BadRequest("Invalid product id");
+
+                bool b = await _productservice.del_product(id);
+                if (b)
+                {
+                    return Ok("Deleted successfully");
+                }
+                else { return NotFound("Product Id does not exist"); }
             }
-            else { return NotFound("Product Id doesnot exists"); }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPatch("{id}/update_qunatity")]
-        public async Task<ActionResult<bool>> update_quantity(int id, int inc_dec)
+        public async Task<ActionResult<bool>> update_quantity(int id, int inc_dec, [FromQuery] int threshold=10)
         {
-            bool b = await _productservice.update_quantity(id, inc_dec);
-            if (b) return CreatedAtAction(nameof(get_productby_id), new { id = id }, true); ;
-            return NotFound("Quantity can't go below zero");
+            try
+            {
+                if (id <= 0) return BadRequest("Invalid product id");
+
+                bool b = await _productservice.update_quantity(id, inc_dec, threshold);
+                if (b) return Ok(true);
+                return NotFound("Quantity can't go below zero");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ProductCreateDto>> update_product(int id, ProductCreateDto new_product)
+        public async Task<ActionResult<ProductCreateDto>> update_product(int id, [FromBody] ProductCreateDto new_product)
         {
-            bool b = await _productservice.edit_product(id, new_product);
-            if (b) return CreatedAtAction(nameof(get_productby_id), new { id = new_product.ProductId }, new_product);
-            else return BadRequest("Id cannot be changed");
+            try
+            {
+                if (new_product == null)
+                    return BadRequest("Product cannot be null");
+
+                if (new_product.ProductId < 0)
+                    return BadRequest("ProductId cannot be negative");
+
+                if (string.IsNullOrWhiteSpace(new_product.Name))
+                    return BadRequest("Product name is required");
+
+                if (string.IsNullOrWhiteSpace(new_product.Category))
+                    return BadRequest("Category is required");
+
+                if (string.IsNullOrWhiteSpace(new_product.Description))
+                    return BadRequest("Description is required");
+
+                if (new_product.Quantity < 0)
+                    return BadRequest("Quantity cannot be negative");
+
+                if (!string.IsNullOrWhiteSpace(new_product.ImageUrl) &&
+                    !Uri.IsWellFormedUriString(new_product.ImageUrl, UriKind.Absolute))
+                {
+                    return BadRequest("ImageUrl must be a valid URL");
+                }
+
+                if (new_product.Price <= 0)
+                    return BadRequest("Price must be greater than 0");
+
+                if (new_product.SupplierId <= 0)
+                    return BadRequest("SupplierId is required and must be positive");
+
+                bool b = await _productservice.edit_product(id, new_product);
+                if (b)
+                    return Ok(new_product);
+                else
+                    return BadRequest("Id cannot be changed or product not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
 
         [HttpPatch("{id}/change_supplier")]
         public async Task<ActionResult<string>> change_supplier(int id, int supplier_id)
         {
-            bool b = await _productservice.edit_supplier(id, supplier_id);
-            if (b) return CreatedAtAction(nameof(get_productby_id), new { id = id }, "Supplier Changed");
-            else return NotFound("Incorrect Supplier_data/Product_id");
+            try
+            {
+                if (id <= 0 || supplier_id <= 0)
+                    return BadRequest("Invalid product/supplier id");
+
+                bool b = await _productservice.edit_supplier(id, supplier_id);
+                if (b) return Ok("Supplier changed successfully");
+                else return NotFound("Incorrect SupplierId or ProductId");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("get_stocks")]
-        public async Task<ActionResult<Low_High_Stocks>> get_stocks()
+        public async Task<ActionResult<Low_High_Stocks>> get_stocks([FromQuery] int threshold = 10)
         {
-            return await _productservice.segreating_low_high_stocks();
+            try
+            {
+                var result = await _productservice.segreating_low_high_stocks(threshold);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
+
         [HttpGet("{type}/filter_products")]
         public async Task<ActionResult<IList<ProductCreateDto>>> filter_products_type(string type)
         {
-            var filter_products = await _productservice.filter(type);
-            if (filter_products == null) return NotFound("No products found");
-            return Ok(filter_products);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(type))
+                    return BadRequest("Filter type is required");
+
+                var filter_products = await _productservice.filter(type);
+                if (filter_products == null || !filter_products.Any())
+                    return NotFound("No products found");
+                return Ok(filter_products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
         [HttpGet("search")]
         public async Task<ActionResult<IList<ProductCreateDto>>> Search(string name)
         {
-            var products = await _productservice.search(name);
-            if (products == null) return NotFound("No products found");
-            return Ok(products);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    return BadRequest("Search term cannot be empty");
+
+                var products = await _productservice.search(name);
+                if (products == null || !products.Any())
+                    return NotFound("No products found");
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
         [HttpGet("pagination")]
         public async Task<IActionResult> GetProducts(int page = 1, int pageSize = 5)
         {
-            var result = await _productservice.GetPagedProducts(page, pageSize);
-            return Ok(result);
+            try
+            {
+                if (page <= 0) return BadRequest("Page must be greater than 0");
+                if (pageSize <= 0) return BadRequest("PageSize must be greater than 0");
+
+                var result = await _productservice.GetPagedProducts(page, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

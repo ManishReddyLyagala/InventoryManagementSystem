@@ -42,10 +42,6 @@ namespace InventoryManagement_Backend.Services
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            if (product.Quantity < 10)
-            {
-                await _stockAlertService.SendDailyLowStockEmailAsync(10);
-            }
             return product.ProductId;
         }
 
@@ -93,16 +89,16 @@ namespace InventoryManagement_Backend.Services
             return product.Quantity;
         }
 
-        public async Task<bool> update_quantity(int id, int inc_dec)
+        public async Task<bool> update_quantity(int id, int inc_dec, int threshold)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
             int quantity = product.Quantity + inc_dec;
             if (quantity < 0) return false;
             product.Quantity = quantity;
             await _context.SaveChangesAsync();
-            if (product.Quantity < 10)
+            if (product.Quantity < threshold)
             {
-                await _stockAlertService.SendDailyLowStockEmailAsync(10);
+                await _stockAlertService.SendDailyLowStockEmailAsync(threshold);
             }
             return true;
         }
@@ -117,10 +113,6 @@ namespace InventoryManagement_Backend.Services
             product.Category = new_product.Category;
             product.ImageUrl = new_product.ImageUrl;
             product.Quantity = new_product.Quantity;
-            if (product.Quantity < 10)
-            {
-                await _stockAlertService.SendDailyLowStockEmailAsync(10);
-            }
             product.Price = new_product.Price;
             if (product.SupplierId != new_product.SupplierId)
             {
@@ -149,7 +141,7 @@ namespace InventoryManagement_Backend.Services
             return true;
         }
 
-        public async Task<Low_High_Stocks> segreating_low_high_stocks()
+        public async Task<Low_High_Stocks> segreating_low_high_stocks(int threshold)
         {
             var products = await _context.Products.ToListAsync();
 
@@ -159,7 +151,7 @@ namespace InventoryManagement_Backend.Services
             {
                 ProductCreateDto dto = map(product);
 
-                if (product.Quantity > 10) ls.Highstocks.Add(dto);
+                if (product.Quantity > threshold) ls.Highstocks.Add(dto);
                 else ls.Lowstocks.Add(dto);
             }
             return ls;
@@ -196,8 +188,14 @@ namespace InventoryManagement_Backend.Services
             if (string.IsNullOrWhiteSpace(keyword))
                 return null;
 
+            keyword = keyword.ToLower().Trim();
+
             var products = await _context.Products
-                .Where(p => p.Name.ToLower().Contains(keyword.ToLower().Trim()))
+                .Where(p =>
+                    p.Name.ToLower().Contains(keyword) ||
+                    (!string.IsNullOrEmpty(p.Category) && p.Category.ToLower().Contains(keyword)) ||
+                    (!string.IsNullOrEmpty(p.Description) && p.Description.ToLower().Contains(keyword))
+                )
                 .ToListAsync();
 
             if (products.Count == 0) return null;
