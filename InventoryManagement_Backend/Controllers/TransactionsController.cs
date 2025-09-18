@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using InventoryManagement_Backend.Services.Interfaces;
+﻿using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
+using InventoryManagement_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 namespace InventoryManagement_Backend.Controllers
 {
     [Route("api/[controller]")]
@@ -31,14 +32,14 @@ namespace InventoryManagement_Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Transaction transaction)
+        public async Task<IActionResult> Create([FromBody] TransactionCreateDto transaction)
         {
             var created = await _transactionService.CreateAsync(transaction);
             return CreatedAtAction(nameof(GetById), new { id = created.TransactionId }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Transaction transaction)
+        public async Task<IActionResult> Update(int id, [FromBody] TransactionCreateDto transaction)
         {
             var updated = await _transactionService.UpdateAsync(id, transaction);
             if (updated is null) return NotFound();
@@ -57,66 +58,13 @@ namespace InventoryManagement_Backend.Controllers
         public async Task<IActionResult> FilterTransactions(
             string? type,
             DateTime? date,
-            int? customerId,
-            int? supplierId)
+            int? productId, int? supplierId, int? customerId)
         {
-            char? typeChar = null;
-
-            if (!string.IsNullOrEmpty(type) && type.Length == 1)
-                typeChar = type[0];
-
-            var transactions = await _transactionService.FilterAsync(typeChar, date, customerId, supplierId);
+           
+            var transactions = await _transactionService.FilterAsync(type, date, productId, supplierId, customerId);
             return Ok(transactions);
         }
-        [HttpGet("daily")]
-        public async Task<IActionResult> GetDailyReport()
-        {
-            var today = DateTime.UtcNow.Date;
-
-            var (Purchases,  Sales,  noOfpurchases,  noOfsales) = await _transactionService.GetDailyReportAsync(today);
-
-            var report = new
-            {
-                Date = today.ToString("yyyy-MM-dd"),
-                TotalPurchases = Purchases,
-                TotalSales = Sales,
-                noOfpurchases = noOfpurchases,
-                noOfsales = noOfsales
-            };
-
-            return Ok(report);
-        }
-
-        [HttpGet("monthly")]
-        public async Task<IActionResult> GetMonthlyReport([FromQuery] int? year, [FromQuery] int? month)
-        {
-            var y = year ?? DateTime.UtcNow.Year;
-            var m = month ?? DateTime.UtcNow.Month;
-
-            var report = await _transactionService.GetMonthlyReportAsync(y, m);
-
-            return Ok(new
-            {
-                Year = y,
-                Month = m,
-                Breakdown = report
-            });
-        }
-
-        [HttpGet("reports/yearly/{year}")]
-        public async Task<IActionResult> GetYearlyReport(int year)
-        {
-            try
-            {
-                var report = await _transactionService.GetYearlyReportAsync(year);
-                return Ok(report);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
+        
 
 
     }

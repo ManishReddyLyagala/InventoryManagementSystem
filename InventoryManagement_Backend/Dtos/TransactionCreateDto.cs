@@ -2,13 +2,9 @@
 {
     public class TransactionCreateDto
     {
-        public char Type { get; set; } // 'P' or 'S'
-        public DateTime? DateTime { get; set; }
+        public string TransactionType { get; set; } // 'P' or 'S'
+        public DateTime TransactionDate { get; set; }
 
-        // specify one of SupplierId / CustomerId depending on type
-        public int? SupplierId { get; set; }
-        public int? CustomerId { get; set; }
-
-        public List<PurchaseSalesOrderDto> Lines { get; set; } = new();
+        //public List<PurchaseSalesOrderDto> Lines { get; set; } = new();
     }
 }

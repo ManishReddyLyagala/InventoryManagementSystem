@@ -14,17 +14,10 @@ namespace InventoryManagement_Backend.Models
         /// 'P' = Purchase, 'S' = Sale
         /// </summary>
         [Required]
-        public char Type { get; set; }
+        public string TransactionType { get; set; }
 
         [Required]
-        public DateTime DateTime { get; set; } = DateTime.UtcNow;
-
-        // Nullable depending on Type
-        public int? SupplierId { get; set; }
-        public Supplier? Supplier { get; set; }
-
-        public int? CustomerId { get; set; }
-        public Customer? Customer { get; set; }
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
 
         // Navigation: 1 transaction => many PurchaseOrder lines
         public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();

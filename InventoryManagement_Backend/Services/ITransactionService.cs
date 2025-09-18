@@ -5,21 +5,13 @@ namespace InventoryManagement_Backend.Services.Interfaces
 {
     public interface ITransactionService
     {
-        Task<IEnumerable<TransactionCreateDto>> GetAllAsync();
-        Task<Transaction?> GetByIdAsync(int id);
-        Task<Transaction> CreateAsync(Transaction transaction);
-        Task<Transaction?> UpdateAsync(int id, Transaction transaction);
+        Task<IEnumerable<TransactionDto>> GetAllAsync();
+        Task<TransactionDto?> GetByIdAsync(int id);
+        Task<TransactionDto> CreateAsync(TransactionCreateDto transaction);
+        Task<TransactionDto?> UpdateAsync(int id, TransactionCreateDto transaction);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Transaction>> FilterAsync(
-            char? type,
-            DateTime? date,
-            int? customerId,
-            int? supplierId);
-
-
-      Task<(decimal Purchases, decimal Sales, decimal NoOfPurchases, decimal NoOfSales)> GetDailyReportAsync(DateTime date);
-       Task<IEnumerable<object>> GetMonthlyReportAsync(int year, int month);
-        Task<IEnumerable<object>> GetYearlyReportAsync(int year);
-
+        Task<IEnumerable<TransactionDto>> FilterAsync(
+            string? type,
+            DateTime? date, int? productId, int? supplierId, int? customerId);
     }
 }

@@ -4,7 +4,6 @@ using InventoryManagement_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagement_Backend.Dtos;
 
-
 namespace InventoryManagement_Backend.Services
 {
     public class TransactionService : ITransactionService
@@ -16,84 +15,203 @@ namespace InventoryManagement_Backend.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<TransactionCreateDto>> GetAllAsync()
+        // Get all transactions with orders
+        public async Task<IEnumerable<TransactionDto>> GetAllAsync()
         {
-            return await _context.Transactions
-               .Select(t => new TransactionCreateDto
-               {
-                   Type = t.Type,
-                   DateTime = t.DateTime,
-                   SupplierId = t.SupplierId,
-                   CustomerId = t.CustomerId
-               })
-               .ToListAsync();
-
-
+            try
+            {
+                return await _context.Transactions
+                    .Include(t => t.PurchaseSalesOrders)
+                    .SelectMany(t => t.PurchaseSalesOrders, (t, o) => new TransactionDto
+                    {
+                        TransactionId = t.TransactionId,
+                        TransactionType = t.TransactionType,
+                        TransactionDate = t.TransactionDate,
+                        OrderId = o.OrderId,
+                        ProductId = o.ProductId,
+                        Quantity = o.Quantity,
+                        TotalAmount = o.TotalAmount,
+                        SupplierId = o.SupplierId,
+                        CustomerId = o.CustomerId
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log ex here
+                throw new ApplicationException("Error fetching transactions.", ex);
+            }
         }
 
-        public async Task<Transaction?> GetByIdAsync(int id)
+        // Get a transaction by id
+        public async Task<TransactionDto?> GetByIdAsync(int id)
         {
-            return await _context.Transactions
+            if (id <= 0)
+                throw new ArgumentException("Invalid transaction ID.");
 
-                .FirstOrDefaultAsync(t => t.TransactionId == id);
+            try
+            {
+                return await _context.Transactions
+                    .Include(t => t.PurchaseSalesOrders)
+                    .Where(t => t.TransactionId == id)
+                    .SelectMany(t => t.PurchaseSalesOrders, (t, o) => new TransactionDto
+                    {
+                        TransactionId = t.TransactionId,
+                        TransactionType = t.TransactionType,
+                        TransactionDate = t.TransactionDate,
+                        OrderId = o.OrderId,
+                        ProductId = o.ProductId,
+                        Quantity = o.Quantity,
+                        TotalAmount = o.TotalAmount,
+                        SupplierId = o.SupplierId,
+                        CustomerId = o.CustomerId
+                    })
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Error fetching transaction with ID {id}.", ex);
+            }
         }
 
-        public async Task<Transaction> CreateAsync(Transaction transaction)
+        // Create a new transaction
+        public async Task<TransactionDto> CreateAsync(TransactionCreateDto transactionDto)
         {
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
-            return transaction;
+            if (transactionDto == null)
+                throw new ArgumentNullException(nameof(transactionDto));
+
+            if (string.IsNullOrEmpty(transactionDto.TransactionType))
+                throw new ArgumentException("TransactionType is required.");
+
+            try
+            {
+                var transaction = new Transaction
+                {
+                    TransactionType = transactionDto.TransactionType,
+                    TransactionDate = transactionDto.TransactionDate
+                };
+
+                _context.Transactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                return new TransactionDto
+                {
+                    TransactionId = transaction.TransactionId,
+                    TransactionType = transaction.TransactionType,
+                    TransactionDate = transaction.TransactionDate
+                };
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new ApplicationException("Error saving transaction to database.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Unexpected error creating transaction.", ex);
+            }
         }
 
-        public async Task<Transaction?> UpdateAsync(int id, Transaction transaction)
+        // Update transaction
+        public async Task<TransactionDto?> UpdateAsync(int id, TransactionCreateDto transactionDto)
         {
-            var existing = await _context.Transactions.FindAsync(id);
-            if (existing == null) return null;
+            if (id <= 0)
+                throw new ArgumentException("Invalid transaction ID.");
 
-            existing.Type = transaction.Type;
-            existing.SupplierId = transaction.SupplierId;
-            existing.CustomerId = transaction.CustomerId;
-            existing.DateTime = transaction.DateTime;
+            if (transactionDto == null)
+                throw new ArgumentNullException(nameof(transactionDto));
 
-            await _context.SaveChangesAsync();
-            return existing;
+            try
+            {
+                var existing = await _context.Transactions
+                    .FirstOrDefaultAsync(t => t.TransactionId == id);
+
+                if (existing == null)
+                    return null;
+
+                existing.TransactionType = transactionDto.TransactionType;
+                existing.TransactionDate = transactionDto.TransactionDate;
+
+                await _context.SaveChangesAsync();
+
+                return new TransactionDto
+                {
+                    TransactionId = existing.TransactionId,
+                    TransactionType = existing.TransactionType,
+                    TransactionDate = existing.TransactionDate
+                };
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new ApplicationException($"Error updating transaction with ID {id}.", ex);
+            }
         }
 
+        // Delete transaction
         public async Task<bool> DeleteAsync(int id)
         {
-            var transaction = await _context.Transactions.FindAsync(id);
-            if (transaction == null) return false;
+            if (id <= 0)
+                throw new ArgumentException("Invalid transaction ID.");
 
-            _context.Transactions.Remove(transaction);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                var transaction = await _context.Transactions.FindAsync(id);
+                if (transaction == null) return false;
+
+                _context.Transactions.Remove(transaction);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new ApplicationException($"Error deleting transaction with ID {id}.", ex);
+            }
         }
 
-        public async Task<IEnumerable<Transaction>> FilterAsync(char? type, DateTime? date, int? customerId, int? supplierId)
+        // Filter transactions
+        public async Task<IEnumerable<TransactionDto>> FilterAsync(
+            string? type,
+            DateTime? date,
+            int? productId,
+            int? supplierId,
+            int? customerId)
         {
-            var query = _context.Transactions
-                .Include(t => t.PurchaseSalesOrders)
-                .AsQueryable();
+            try
+            {
+                var query = _context.Transactions
+                    .Include(t => t.PurchaseSalesOrders)
+                    .AsQueryable();
 
-            if (type.HasValue)
-                query = query.Where(t => t.Type == type);
-            if (date.HasValue)
-                query = query.Where(t => t.DateTime == date);
+                if (!string.IsNullOrEmpty(type))
+                    query = query.Where(t => t.TransactionType == type);
+                if (date.HasValue)
+                    query = query.Where(t => t.TransactionDate.Date == date.Value.Date);
 
-            if (customerId.HasValue)
-                query = query.Where(t => t.CustomerId == customerId.Value);
+                if (productId.HasValue)
+                    query = query.Where(t => t.PurchaseSalesOrders.Any(po => po.ProductId == productId));
+                if (customerId.HasValue)
+                    query = query.Where(t => t.PurchaseSalesOrders.Any(po => po.CustomerId == customerId));
+                if (supplierId.HasValue)
+                    query = query.Where(t => t.PurchaseSalesOrders.Any(po => po.SupplierId == supplierId));
 
-            if (supplierId.HasValue)
-                query = query.Where(t => t.SupplierId == supplierId.Value);
-
-            return await query.ToListAsync();
-            
+                return await query
+                    .SelectMany(t => t.PurchaseSalesOrders, (t, o) => new TransactionDto
+                    {
+                        TransactionId = t.TransactionId,
+                        TransactionType = t.TransactionType,
+                        TransactionDate = t.TransactionDate,
+                        OrderId = o.OrderId,
+                        ProductId = o.ProductId,
+                        Quantity = o.Quantity,
+                        TotalAmount = o.TotalAmount,
+                        SupplierId = o.SupplierId,
+                        CustomerId = o.CustomerId
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error filtering transactions.", ex);
+            }
         }
-
-       
-
-
-
-
     }
 }
