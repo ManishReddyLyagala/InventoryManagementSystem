@@ -28,12 +28,6 @@ namespace InventoryManagement_Backend.Data
                 .HasForeignKey(p => p.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Transaction -> Supplier (nullable)
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.Supplier)
-                .WithMany(s => s.PurchaseTransactions)
-                .HasForeignKey(t => t.SupplierId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.EmailID)
@@ -45,6 +39,12 @@ namespace InventoryManagement_Backend.Data
             //    .WithMany(c => c.SalesTransactions)
             //    .HasForeignKey(t => t.CustomerId)
             //    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.HasKey(t => t.TransactionId);
+            });
+
 
             modelBuilder.Entity<PurchaseSalesOrders>()
                 .Property(p => p.TotalAmount)
@@ -77,15 +77,15 @@ namespace InventoryManagement_Backend.Data
             //    .OnDelete(DeleteBehavior.Restrict);
 
             // CHECK constraint: Type must be 'P' or 'S'
-            modelBuilder.Entity<Transaction>()
-                .HasCheckConstraint("CK_Transactions_Type", "Type IN ('P','S')");
+            //modelBuilder.Entity<Transaction>()
+            //    .HasCheckConstraint("CK_Transactions_Type", "Type IN ('P','S')");
 
             // Business rule constraint:
             // If Type='P' then SupplierId IS NOT NULL AND CustomerId IS NULL
             // If Type='S' then CustomerId IS NOT NULL AND SupplierId IS NULL
-            modelBuilder.Entity<Transaction>()
-                .HasCheckConstraint("CK_Transactions_Business",
-                    "((Type = 'P' AND SupplierId IS NOT NULL AND CustomerId IS NULL) OR (Type = 'S' AND CustomerId IS NOT NULL AND SupplierId IS NULL))");
+            //modelBuilder.Entity<Transaction>()
+            //    .HasCheckConstraint("CK_Transactions_Business",
+            //        "((Type = 'P' AND SupplierId IS NOT NULL AND CustomerId IS NULL) OR (Type = 'S' AND CustomerId IS NOT NULL AND SupplierId IS NULL))");
 
             // Product.Quantity default 0 (already handled via model default) but also set default in DB
             modelBuilder.Entity<Product>()
@@ -94,7 +94,7 @@ namespace InventoryManagement_Backend.Data
 
             // Indexes for common lookups
             modelBuilder.Entity<Product>().HasIndex(p => p.SupplierId);
-            modelBuilder.Entity<Transaction>().HasIndex(t => new { t.Type, t.DateTime });
+            modelBuilder.Entity<Transaction>().HasIndex(t => new { t.TransactionType, t.TransactionDate });
             modelBuilder.Entity<PurchaseSalesOrders>().HasIndex(po => po.TransactionId);
         }
     }

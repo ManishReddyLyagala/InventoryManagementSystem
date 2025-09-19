@@ -49,7 +49,7 @@ namespace InventoryManagement_Backend.Services
             foreach (var item in orderRequest.Items) {
                 if (item.ProductId <= 0)
                     throw new ArgumentException($"Invalid ProductId for one of the items. ProductId: {item.ProductId}");
-
+                
                 if (item.Quantity <= 0)
                     throw new ArgumentException($"Quantity must be greater than 0 for ProductId {item.ProductId}");
 
@@ -190,7 +190,7 @@ namespace InventoryManagement_Backend.Services
                     TotalAmount = (decimal?)g.Sum(o=>o.TotalAmount) ?? 0
                 }).ToListAsync();
         }
-
+        
         
     }
 }
