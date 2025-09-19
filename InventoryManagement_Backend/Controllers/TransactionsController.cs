@@ -1,4 +1,5 @@
 ﻿using InventoryManagement_Backend.Dtos;
+using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,7 @@ namespace InventoryManagement_Backend.Controllers
             try
             {
                 var created = await _transactionService.CreateAsync(transaction);
-                return CreatedAtAction(nameof(GetById), new { id = created.TransactionId }, created);
+                return CreatedAtAction(nameof(GetById), new { id = created.TransactionType }, created);
             }
             catch (Exception ex)
             {
@@ -115,13 +116,14 @@ namespace InventoryManagement_Backend.Controllers
         public async Task<IActionResult> FilterTransactions(
             string? type,
             DateTime? date,
+            TransactionStatus? status,
             int? productId,
             int? supplierId,
             int? userId)
         {
             try
             {
-                var transactions = await _transactionService.FilterAsync(type, date, productId, supplierId, userId);
+                var transactions = await _transactionService.FilterAsync(type, date, status, productId, supplierId, userId);
                 return Ok(transactions);
             }
             catch (Exception ex)

@@ -3,6 +3,10 @@ using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagement_Backend.Dtos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace InventoryManagement_Backend.Services
 {
@@ -24,6 +28,7 @@ namespace InventoryManagement_Backend.Services
                     TransactionId = t.TransactionId,
                     TransactionType = t.TransactionType,
                     TransactionDate = t.TransactionDate,
+                    Status = t.Status,
                     OrderId = o.OrderId,
                     ProductId = o.ProductId,
                     Quantity = o.Quantity,
@@ -46,6 +51,7 @@ namespace InventoryManagement_Backend.Services
                     TransactionId = t.TransactionId,
                     TransactionType = t.TransactionType,
                     TransactionDate = t.TransactionDate,
+                    Status = t.Status,
                     OrderId = o.OrderId,
                     ProductId = o.ProductId,
                     Quantity = o.Quantity,
@@ -68,6 +74,7 @@ namespace InventoryManagement_Backend.Services
                     TransactionId = t.TransactionId,
                     TransactionType = t.TransactionType,
                     TransactionDate = t.TransactionDate,
+                    Status = t.Status,
                     OrderId = o.OrderId,
                     ProductId = o.ProductId,
                     Quantity = o.Quantity,
@@ -78,7 +85,7 @@ namespace InventoryManagement_Backend.Services
                 .ToListAsync();
         }
 
-        public async Task<TransactionDto> CreateAsync(TransactionCreateDto transactionDto)
+        public async Task<TransactionCreateDto> CreateAsync(TransactionCreateDto transactionDto)
         {
             if (transactionDto == null) throw new ArgumentNullException(nameof(transactionDto));
             if (string.IsNullOrEmpty(transactionDto.TransactionType))
@@ -87,17 +94,18 @@ namespace InventoryManagement_Backend.Services
             var transaction = new Transaction
             {
                 TransactionType = transactionDto.TransactionType,
-                TransactionDate = transactionDto.TransactionDate
+                TransactionDate = transactionDto.TransactionDate,
+                Status = transactionDto.Status ?? TransactionStatus.Pending
             };
 
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
 
-            return new TransactionDto
+            return new TransactionCreateDto
             {
-                TransactionId = transaction.TransactionId,
                 TransactionType = transaction.TransactionType,
-                TransactionDate = transaction.TransactionDate
+                TransactionDate = transaction.TransactionDate,
+                Status = transaction.Status
             };
         }
 
@@ -111,6 +119,8 @@ namespace InventoryManagement_Backend.Services
 
             existing.TransactionType = transactionDto.TransactionType;
             existing.TransactionDate = transactionDto.TransactionDate;
+            if (transactionDto.Status.HasValue)
+                existing.Status = transactionDto.Status.Value;
 
             await _context.SaveChangesAsync();
 
@@ -118,7 +128,8 @@ namespace InventoryManagement_Backend.Services
             {
                 TransactionId = existing.TransactionId,
                 TransactionType = existing.TransactionType,
-                TransactionDate = existing.TransactionDate
+                TransactionDate = existing.TransactionDate,
+                Status = existing.Status
             };
         }
 
@@ -137,6 +148,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<IEnumerable<TransactionDto>> FilterAsync(
             string? type,
             DateTime? date,
+            TransactionStatus? status,
             int? productId,
             int? supplierId,
             int? userId)
@@ -150,6 +162,9 @@ namespace InventoryManagement_Backend.Services
 
             if (date.HasValue)
                 query = query.Where(t => t.TransactionDate.Date == date.Value.Date);
+
+            if (status.HasValue)
+                query = query.Where(t => t.Status == status.Value);
 
             if (productId.HasValue)
                 query = query.Where(t => t.PurchaseSalesOrders.Any(po => po.ProductId == productId));
@@ -166,6 +181,7 @@ namespace InventoryManagement_Backend.Services
                     TransactionId = t.TransactionId,
                     TransactionType = t.TransactionType,
                     TransactionDate = t.TransactionDate,
+                    Status = t.Status,
                     OrderId = o.OrderId,
                     ProductId = o.ProductId,
                     Quantity = o.Quantity,
