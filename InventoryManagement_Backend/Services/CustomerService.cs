@@ -17,15 +17,16 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<IEnumerable<CustomerReadDto>> GetAllCustomersAsync()
         {
-            return await _context.Customers
-                .Select(c => new CustomerReadDto
-                {
-                    CustomerId = c.CustomerId,
-                    Name = c.Name,
-                    Mobile_Number = c.Mobile_Number,
-                    Email = c.Email
-                })
-                .ToListAsync();
+            var customers = await _context.User.Where(u => u.Role == "Customer").ToListAsync();
+
+            return customers.Select(u => new CustomerReadDto
+            {
+                UserId = u.UserId,
+                Name = u.Name,
+                MobileNumber = u.MobileNumber,
+                EmailID = u.EmailID,
+                Role = u.Role
+            }).ToList();
         }
 
         //public async Task<CustomerDetailDto?> GetCustomerByIdAsync(int id)
@@ -57,27 +58,26 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<CustomerByIDReadDto?> GetCustomerByIdAsync(int id)
         {
-            var customer = await _context.Customers
-                .Include(c => c.Transactions)
-                    .ThenInclude(t => t.PurchaseSalesOrders)
-                        .ThenInclude(po => po.Product)
-                            .ThenInclude(t => t.Supplier)
-                .FirstOrDefaultAsync(c => c.CustomerId == id);
+            var customer = await _context.User
+                                         .Where(u => u.Role == "Customer" && u.UserId == id)
+                                         .FirstOrDefaultAsync();
 
             if (customer == null) return null;
 
             return new CustomerByIDReadDto
             {
-                CustomerId = customer.CustomerId,
+                UserId = customer.UserId, // renamed to match User table
                 Name = customer.Name,
-                Mobile_Number = customer.Mobile_Number,
-                Email = customer.Email,
-                Transactions = customer.Transactions.Select(t => new TransactionDto
+                MobileNumber = customer.MobileNumber,
+                EmailID = customer.EmailID,
+                Role = customer.Role,
+                Transactions = customer.SalesTransactions.Select(t => new TransactionDto
                 {
                     TransactionId = t.TransactionId,
                     Type = t.Type,
                     DateTime = t.DateTime,
                     SupplierId = t.SupplierId,
+                    CustomerId = t.CustomerId,
 
                     Orders = t.PurchaseSalesOrders.Select(po => new PurchaseSalesOrderDto
                     {
@@ -88,21 +88,23 @@ namespace InventoryManagement_Backend.Services
                         TotalAmount = po.TotalAmount,
                         OrderType = t.Type,
                         SupplierId = t.SupplierId,
-                        CustomerId = t.CustomerId,
+                        UserId = t.CustomerId,
                         OrderDate = t.DateTime,
 
-                        SupplierName = po.Product.SupplierId != null ? po.Product.Supplier.Name : null,
+                        // Supplier name from Product → Supplier
+                        SupplierName = po.Product?.Supplier != null ? po.Product.Supplier.Name : null,
 
-                        Product = new ProductReadDto
+                        Product = po.Product != null ? new ProductReadDto
                         {
                             ProductId = po.Product.ProductId,
                             Name = po.Product.Name,
                             Category = po.Product.Category,
                             Quantity = po.Product.Quantity
-                        }
+                        } : null
                     }).ToList()
                 }).ToList()
             };
+
         }
 
 
@@ -142,10 +144,12 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<bool> DeleteCustomerAsync(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.User
+                                         .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Customer");
+
             if (customer == null) return false;
 
-            _context.Customers.Remove(customer);
+            _context.User.Remove(customer);
             await _context.SaveChangesAsync();
             return true;
         }

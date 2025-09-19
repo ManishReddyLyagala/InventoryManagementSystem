@@ -7,7 +7,7 @@ namespace InventoryManagement_Backend.Dtos
     {
         public int SupplierId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public long MobileNumber { get; set; }
+        public string MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
     }
@@ -16,7 +16,7 @@ namespace InventoryManagement_Backend.Dtos
     {
         public int SupplierId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public long MobileNumber { get; set; }
+        public string MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
         public List<ProductReadDto> Products { get; set; } = new();
@@ -40,7 +40,7 @@ namespace InventoryManagement_Backend.Dtos
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public long MobileNumber { get; set; }
+        public string MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
     }
@@ -54,7 +54,7 @@ namespace InventoryManagement_Backend.Dtos
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public long? MobileNumber { get; set; }
+        public string? MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
     }

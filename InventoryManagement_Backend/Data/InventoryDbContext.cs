@@ -1,4 +1,5 @@
-﻿using InventoryManagement_Backend.Models;
+﻿using InventoryManagement.Models;
+using InventoryManagement_Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Reflection.Emit;
@@ -12,10 +13,11 @@ namespace InventoryManagement_Backend.Data
         }
 
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<Customer> Customers { get; set; }
+        public DbSet<User> User { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<PurchaseSalesOrders> PurchaseOrders { get; set; }
+        public DbSet<PurchaseSalesOrders> PurchaseSalesOrders { get; set; }
+        public DbSet<SupplierCategory> SupplierCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,12 +37,16 @@ namespace InventoryManagement_Backend.Data
                 .HasForeignKey(t => t.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.EmailID)
+                .IsUnique();
+
             // Transaction -> Customer (nullable)
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.Customer)
-                .WithMany(c => c.Transactions)
-                .HasForeignKey(t => t.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Transaction>()
+            //    .HasOne(t => t.Customer)
+            //    .WithMany(c => c.SalesTransactions)
+            //    .HasForeignKey(t => t.CustomerId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PurchaseSalesOrders>()
                 .Property(p => p.TotalAmount)
@@ -59,6 +65,12 @@ namespace InventoryManagement_Backend.Data
                 .WithMany(p => p.PurchaseSalesOrders)
                 .HasForeignKey(po => po.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //SupplierCategory -> Supplier
+            modelBuilder.Entity<Supplier>()
+                .HasOne(s => s.SupplierCategory)
+                .WithOne(sc => sc.Supplier)
+                .HasForeignKey<SupplierCategory>(sc => sc.SupplierId);
 
             //modelBuilder.Entity<PurchaseSalesOrders>()
             //    .HasOne(p => p.Customer)

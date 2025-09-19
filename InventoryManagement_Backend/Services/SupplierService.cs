@@ -101,8 +101,8 @@ namespace InventoryManagement_Backend.Services
             if (!string.IsNullOrEmpty(dto.Name))
                 existing.Name = dto.Name;
 
-            if (dto.MobileNumber.HasValue)
-                existing.MobileNumber = dto.MobileNumber.Value; 
+            if (!string.IsNullOrEmpty(dto.EmailID))
+                existing.MobileNumber = dto.MobileNumber; 
 
             if (!string.IsNullOrEmpty(dto.EmailID))
                 existing.EmailID = dto.EmailID;

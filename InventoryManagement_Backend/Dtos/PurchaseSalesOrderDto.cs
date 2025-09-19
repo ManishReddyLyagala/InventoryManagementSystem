@@ -7,7 +7,7 @@ namespace InventoryManagement_Backend.Dtos
         public int TransactionId { get; set; }
         public string OrderType { get; set; } // "Sales" or "Purchase"
         public int? SupplierId { get; set; }
-        public int? CustomerId { get; set; }
+        public int? UserId { get; set; }
         public List<OrderItemDto> Items { get; set; } = new();
     }
 
@@ -27,7 +27,7 @@ namespace InventoryManagement_Backend.Dtos
         public decimal TotalAmount { get; set; }
         public string OrderType { get; set; } // "Sales" or "Purchase"
         public int? SupplierId { get; set; }
-        public int? CustomerId { get; set; }
+        public int? UserId { get; set; }
         public DateTime OrderDate { get; set; }
 
         // For readability in response

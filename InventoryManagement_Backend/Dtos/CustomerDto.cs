@@ -2,18 +2,20 @@
 {
     public class CustomerReadDto
     {
-        public int CustomerId { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public long Mobile_Number { get; set; }
-        public string? Email { get; set; }
+        public string? MobileNumber { get; set; }
+        public string EmailID { get; set; } = string.Empty;
+        public string Role { get; set; } = "Customer";
     }
 
     public class CustomerByIDReadDto
     {
-        public int CustomerId { get; set; }
+        public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
-        public long Mobile_Number { get; set; }
-        public string? Email { get; set; }
+        public string? MobileNumber { get; set; }
+        public string EmailID { get; set; } = string.Empty;
+        public string Role { get; set; } = "Customer";
 
         public List<TransactionDto> Transactions { get; set; } = new();
     }

@@ -28,7 +28,7 @@ namespace InventoryManagement_Backend.Models
         public string OrderType { get; set; } // "S" or "P"
 
         public int? SupplierId { get; set; }
-        public int? CustomerId { get; set; }
+        public int? UserId { get; set; }
 
         [Required]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
@@ -36,7 +36,7 @@ namespace InventoryManagement_Backend.Models
         // Navigation Properties
         public Product Product { get; set; }
         public Supplier Supplier { get; set; }
-        public Customer Customer { get; set; }
+        public User User { get; set; }
         public Transaction Transaction { get; set; }
     }
 }

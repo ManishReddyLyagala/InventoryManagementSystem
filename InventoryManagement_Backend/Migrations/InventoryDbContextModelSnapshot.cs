@@ -22,7 +22,32 @@ namespace InventoryManagement_Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("InventoryManagement_Backend.Models.Customer", b =>
+            modelBuilder.Entity("InventoryManagement.Models.SupplierCategory", b =>
+                {
+                    b.Property<int>("SupplierCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierCategoryId"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SupplierCategoryId");
+
+                    b.HasIndex("SupplierId")
+                        .IsUnique();
+
+                    b.ToTable("SupplierCategories");
+                });
+
+            modelBuilder.Entity("InventoryManagement_Backend.Models.Customers", b =>
                 {
                     b.Property<int>("CustomerId")
                         .ValueGeneratedOnAdd()
@@ -72,6 +97,9 @@ namespace InventoryManagement_Backend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -87,16 +115,13 @@ namespace InventoryManagement_Backend.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseOrder", b =>
+            modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseSalesOrders", b =>
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
@@ -115,14 +140,16 @@ namespace InventoryManagement_Backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TransactionId")
                         .HasColumnType("int");
 
-                    b.HasKey("OrderId");
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("CustomerId");
+                    b.HasKey("OrderId");
 
                     b.HasIndex("ProductId");
 
@@ -130,7 +157,9 @@ namespace InventoryManagement_Backend.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("PurchaseOrders");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PurchaseSalesOrders");
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Supplier", b =>
@@ -145,8 +174,9 @@ namespace InventoryManagement_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("MobileNumber")
-                        .HasColumnType("bigint");
+                    b.Property<string>("MobileNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -183,11 +213,16 @@ namespace InventoryManagement_Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("TransactionId");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("SupplierId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("Type", "DateTime");
 
@@ -197,6 +232,61 @@ namespace InventoryManagement_Backend.Migrations
 
                             t.HasCheckConstraint("CK_Transactions_Type", "Type IN ('P','S')");
                         });
+                });
+
+            modelBuilder.Entity("InventoryManagement_Backend.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmailID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("MobileNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("EmailID")
+                        .IsUnique();
+
+                    b.ToTable("User");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.SupplierCategory", b =>
+                {
+                    b.HasOne("InventoryManagement_Backend.Models.Supplier", "Supplier")
+                        .WithOne("SupplierCategory")
+                        .HasForeignKey("InventoryManagement.Models.SupplierCategory", "SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Product", b =>
@@ -210,14 +300,10 @@ namespace InventoryManagement_Backend.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseOrder", b =>
+            modelBuilder.Entity("InventoryManagement_Backend.Models.PurchaseSalesOrders", b =>
                 {
-                    b.HasOne("InventoryManagement_Backend.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId");
-
                     b.HasOne("InventoryManagement_Backend.Models.Product", "Product")
-                        .WithMany("PurchaseOrders")
+                        .WithMany("PurchaseSalesOrders")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -227,45 +313,52 @@ namespace InventoryManagement_Backend.Migrations
                         .HasForeignKey("SupplierId");
 
                     b.HasOne("InventoryManagement_Backend.Models.Transaction", "Transaction")
-                        .WithMany("PurchaseOrders")
+                        .WithMany("PurchaseSalesOrders")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.HasOne("InventoryManagement_Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Product");
 
                     b.Navigation("Supplier");
 
                     b.Navigation("Transaction");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Transaction", b =>
                 {
-                    b.HasOne("InventoryManagement_Backend.Models.Customer", "Customer")
+                    b.HasOne("InventoryManagement_Backend.Models.Customers", "Customer")
                         .WithMany("Transactions")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("CustomerId");
 
                     b.HasOne("InventoryManagement_Backend.Models.Supplier", "Supplier")
                         .WithMany("PurchaseTransactions")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("InventoryManagement_Backend.Models.User", null)
+                        .WithMany("SalesTransactions")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Customer");
 
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("InventoryManagement_Backend.Models.Customer", b =>
+            modelBuilder.Entity("InventoryManagement_Backend.Models.Customers", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Product", b =>
                 {
-                    b.Navigation("PurchaseOrders");
+                    b.Navigation("PurchaseSalesOrders");
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Supplier", b =>
@@ -273,11 +366,19 @@ namespace InventoryManagement_Backend.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("PurchaseTransactions");
+
+                    b.Navigation("SupplierCategory")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.Transaction", b =>
                 {
-                    b.Navigation("PurchaseOrders");
+                    b.Navigation("PurchaseSalesOrders");
+                });
+
+            modelBuilder.Entity("InventoryManagement_Backend.Models.User", b =>
+                {
+                    b.Navigation("SalesTransactions");
                 });
 #pragma warning restore 612, 618
         }

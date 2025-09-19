@@ -1,6 +1,7 @@
 ﻿using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 

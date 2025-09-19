@@ -36,7 +36,7 @@ namespace InventoryManagement_Backend.Models
         // Navigation Properties
         public Product? Product { get; set; }
         public Supplier? Supplier { get; set; }
-        public Customer? Customer { get; set; }
+        public Customers? Customer { get; set; }
         public Transaction? Transaction { get; set; }
 
         //public ICollection<Product> Products { get; set; } = new List<Product>();

@@ -24,7 +24,7 @@ namespace InventoryManagement_Backend.Models
         public Supplier? Supplier { get; set; }
 
         public int? CustomerId { get; set; }
-        public Customer? Customer { get; set; }
+        public Customers? Customer { get; set; }
 
         // Navigation: 1 transaction => many PurchaseOrder lines
         public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();
