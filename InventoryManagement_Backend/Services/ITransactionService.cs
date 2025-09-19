@@ -12,6 +12,8 @@ namespace InventoryManagement_Backend.Services.Interfaces
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<TransactionDto>> FilterAsync(
             string? type,
-            DateTime? date, int? productId, int? supplierId, int? customerId);
+            DateTime? date, int? productId, int? supplierId, int? userId);
+
+        Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int userId);
     }
 }

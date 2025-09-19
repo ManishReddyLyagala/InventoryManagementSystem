@@ -35,8 +35,8 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 //// Register services
 //builder.Services.AddScoped<ISupplierService, SupplierService>();
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
-//builder.Services.AddScoped<IProductService, ProductService>();
-//builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Register JwtSettings for IOptions<>
 builder.Services.AddSingleton<IOptions<JwtSettings>>(sp => Options.Create(jwtSettings));
