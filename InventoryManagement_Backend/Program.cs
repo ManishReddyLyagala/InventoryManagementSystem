@@ -1,24 +1,32 @@
+using Hangfire;
+using Hangfire.SqlServer;
 using InventoryManagement_Backend.Data;
 using InventoryManagement_Backend.Services;
-using Microsoft.EntityFrameworkCore;
 using InventoryManagement_Backend.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Hangfire;
 using Hangfire.SqlServer;
 using InventoryManagement_Backend.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
-builder.Services.AddControllers()
-    .AddJsonOptions(opts =>
-    {
-        // avoid cycles in JSON output
-        opts.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-    });
+//// Add services
+//builder.Services.AddControllers()
+//    .AddJsonOptions(opts =>
+//    {
+//        // avoid cycles in JSON output
+//        opts.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+//    });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.Configure<StockAlertSettings>(builder.Configuration.GetSection("StockAlert"));
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+
 
 // DB (SQL Server) - update connection string in appsettings.json
 builder.Services.AddDbContext<InventoryDbContext>(options =>
@@ -28,17 +36,50 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 //builder.Services.AddScoped<ISupplierService, SupplierService>();
 //builder.Services.AddScoped<ICustomerService, CustomerService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ITransactionService, TransactionService>();
+//builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+// Register JwtSettings for IOptions<>
+builder.Services.AddSingleton<IOptions<JwtSettings>>(sp => Options.Create(jwtSettings));
+
+var key = Encoding.UTF8.GetBytes(jwtSettings.Key);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2)
+        };
+    });
+
 builder.Services.AddScoped<IPurchaseSalesOrdersService, PurchaseSalesOrdersServices>();
 
-builder.Services.Configure<StockAlertSettings>(builder.Configuration.GetSection("StockAlert"));
-builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+
+
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IStockAlertService, StockAlertService>();
+builder.Services.AddScoped<IInvoiceEmailService, InvoiceEmailService>();
 
 // Hangfire
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHangfireServer();
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Cors
 builder.Services.AddCors(options =>
@@ -46,6 +87,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "InventoryOrigin",
         policy => policy.WithOrigins("http://localhost:5046/", "https://localhost:7190").AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
+
 var app = builder.Build();
 
 app.UseCors("InventoryOrigin");
@@ -57,6 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

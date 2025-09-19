@@ -12,10 +12,10 @@ namespace InventoryManagement_Backend.Data
         }
 
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<Customer> Customers { get; set; }
+        public DbSet<User> User { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<PurchaseSalesOrders> PurchaseOrders { get; set; }
+        public DbSet<PurchaseSalesOrders> PurchaseSalesOrders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +29,9 @@ namespace InventoryManagement_Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.EmailID)
+                .IsUnique();
 
             // Transaction -> Customer (nullable)
             //modelBuilder.Entity<Transaction>()
