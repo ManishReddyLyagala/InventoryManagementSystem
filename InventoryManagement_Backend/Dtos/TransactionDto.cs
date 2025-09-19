@@ -28,4 +28,11 @@ namespace InventoryManagement_Backend.Dtos
         // Optional during creation; defaults to Pending if not provided
         public TransactionStatus? Status { get; set; } = TransactionStatus.Pending;
     }
+
+    public class TransactionUpdateDto
+    {
+        public string? TransactionType { get; set; }
+        public DateTime? TransactionDate { get; set; }
+        public TransactionStatus? Status { get; set; }
+    }
 }

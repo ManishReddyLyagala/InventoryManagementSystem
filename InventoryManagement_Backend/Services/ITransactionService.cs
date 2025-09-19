@@ -11,7 +11,7 @@ namespace InventoryManagement_Backend.Services.Interfaces
         Task<IEnumerable<TransactionDto>> GetAllAsync();
         Task<TransactionDto?> GetByIdAsync(int id);
         Task<TransactionCreateDto> CreateAsync(TransactionCreateDto transaction);
-        Task<TransactionDto?> UpdateAsync(int id, TransactionCreateDto transaction);
+        Task<TransactionDto?> UpdateAsync(int id, TransactionUpdateDto transaction);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<TransactionDto>> FilterAsync(
             string? type,

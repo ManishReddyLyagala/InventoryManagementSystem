@@ -81,7 +81,7 @@ namespace InventoryManagement_Backend.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] TransactionCreateDto transaction)
+        public async Task<IActionResult> Update(int id, [FromBody] TransactionUpdateDto transaction)
         {
             try
             {

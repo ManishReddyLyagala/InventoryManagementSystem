@@ -109,16 +109,24 @@ namespace InventoryManagement_Backend.Services
             };
         }
 
-        public async Task<TransactionDto?> UpdateAsync(int id, TransactionCreateDto transactionDto)
+        public async Task<TransactionDto?> UpdateAsync(int id, TransactionUpdateDto transactionDto)
         {
             if (id <= 0) throw new ArgumentException("Invalid transaction ID.");
             if (transactionDto == null) throw new ArgumentNullException(nameof(transactionDto));
 
-            var existing = await _context.Transactions.FirstOrDefaultAsync(t => t.TransactionId == id);
+            //var existing = await _context.Transactions.FirstOrDefaultAsync(t => t.TransactionId == id);
+            var existing = await _context.Transactions
+                .Include(t => t.PurchaseSalesOrders)
+                .FirstOrDefaultAsync(t => t.TransactionId == id);
+
             if (existing == null) return null;
 
-            existing.TransactionType = transactionDto.TransactionType;
-            existing.TransactionDate = transactionDto.TransactionDate;
+            if (!string.IsNullOrEmpty(transactionDto.TransactionType))
+                existing.TransactionType = transactionDto.TransactionType;
+
+            if (transactionDto.TransactionDate.HasValue)
+                existing.TransactionDate = transactionDto.TransactionDate.Value;
+
             if (transactionDto.Status.HasValue)
                 existing.Status = transactionDto.Status.Value;
 
@@ -127,9 +135,16 @@ namespace InventoryManagement_Backend.Services
             return new TransactionDto
             {
                 TransactionId = existing.TransactionId,
-                TransactionType = existing.TransactionType,
-                TransactionDate = existing.TransactionDate,
-                Status = existing.Status
+                    TransactionType = existing.TransactionType,
+                    TransactionDate = existing.TransactionDate,
+                    Status = existing.Status,
+                    //OrderId = existing.OrderId,
+                    //ProductId = existing.ProductId,
+                    //Quantity = existing.Quantity,
+                    //TotalAmount = existing.TotalAmount,
+                    //SupplierId = existing.SupplierId,
+                    //UserId = existing.UserId,
+
             };
         }
 

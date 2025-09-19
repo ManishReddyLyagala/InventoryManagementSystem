@@ -6,9 +6,9 @@ namespace InventoryManagement_Backend.Models
 {
     public enum TransactionStatus
     {
-        Pending = "Pending",
-        Completed = "Completed",
-        Cancelled = "Failed"
+        Pending,
+        Completed,
+        Cancelled
     }
 
     public class Transaction
