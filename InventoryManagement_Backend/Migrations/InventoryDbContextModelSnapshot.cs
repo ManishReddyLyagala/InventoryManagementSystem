@@ -319,8 +319,9 @@ namespace InventoryManagement_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("InventoryManagement_Backend.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .WithMany("PurchaseSalesOrders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Product");
 
@@ -378,6 +379,8 @@ namespace InventoryManagement_Backend.Migrations
 
             modelBuilder.Entity("InventoryManagement_Backend.Models.User", b =>
                 {
+                    b.Navigation("PurchaseSalesOrders");
+
                     b.Navigation("SalesTransactions");
                 });
 #pragma warning restore 612, 618

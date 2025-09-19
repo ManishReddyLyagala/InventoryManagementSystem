@@ -19,18 +19,7 @@ namespace InventoryManagement_Backend.Dtos
         public string MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
-        public List<ProductReadDto> Products { get; set; } = new();
-    }
-
-    public class ProductReadDto
-    {
-        public int ProductId { get; set; }
-        public string? Name { get; set; } = string.Empty;
-        public string? Category { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
-        //public int SupplierId { get; set; }
+        public List<ProductCreateDto> Products { get; set; } = new();
     }
 
     // For creating a supplier (client should NOT send SupplierId)

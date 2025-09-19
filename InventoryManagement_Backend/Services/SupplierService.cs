@@ -52,7 +52,7 @@ namespace InventoryManagement_Backend.Services
                     MobileNumber = s.MobileNumber,
                     EmailID = s.EmailID,
                     ProductCategory = s.ProductCategory,
-                    Products = s.Products.Select(p => new ProductReadDto
+                    Products = s.Products.Select(p => new ProductCreateDto
                     {
                         ProductId = p.ProductId,
                         Name = p.Name,

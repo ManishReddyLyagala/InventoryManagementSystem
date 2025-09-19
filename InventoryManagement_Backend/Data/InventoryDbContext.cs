@@ -41,6 +41,13 @@ namespace InventoryManagement_Backend.Data
                 .HasIndex(u => u.EmailID)
                 .IsUnique();
 
+            // User -> PurchaseSalesOrders
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.PurchaseSalesOrders)
+                .WithOne(po => po.User)
+                .HasForeignKey(po => po.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Transaction -> Customer (nullable)
             //modelBuilder.Entity<Transaction>()
             //    .HasOne(t => t.Customer)

@@ -29,79 +29,42 @@ namespace InventoryManagement_Backend.Services
             }).ToList();
         }
 
-        //public async Task<CustomerDetailDto?> GetCustomerByIdAsync(int id)
-        //{
-        //    var customer = await _context.Customers
-        //        .Include(c => c.Transactions)
-        //            .ThenInclude(t => t.PurchaseOrders)
-        //             .ThenInclude(p => p.Product)
-        //        .FirstOrDefaultAsync(c => c.CustomerId == id);
-
-        //    if (customer == null) return null;
-
-        //    return new CustomerDetailDto
-        //    {
-        //        CustomerId = customer.CustomerId,
-        //        Name = customer.Name,
-        //        Mobile_Number = customer.Mobile_Number,
-        //        Email = customer.Email,
-        //        Orders = customer.Transactions.Select(t => new TransactionDto
-        //        {
-        //            TransactionId = t.TransactionId,
-        //            Type = t.Type,
-        //            DateTime = t.DateTime,
-        //            SupplierId = t.SupplierId,
-        //            CustomerId = t.CustomerId
-        //        }).ToList()
-        //    };
-        //}
 
         public async Task<CustomerByIDReadDto?> GetCustomerByIdAsync(int id)
         {
             var customer = await _context.User
-                                         .Where(u => u.Role == "Customer" && u.UserId == id)
-                                         .FirstOrDefaultAsync();
+                                .Include(u => u.PurchaseSalesOrders)
+                                    .ThenInclude(po => po.Product)
+                                .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Customer");
+
 
             if (customer == null) return null;
 
             return new CustomerByIDReadDto
             {
-                UserId = customer.UserId, // renamed to match User table
+                UserId = customer.UserId,
                 Name = customer.Name,
                 MobileNumber = customer.MobileNumber,
                 EmailID = customer.EmailID,
                 Role = customer.Role,
-                Transactions = customer.SalesTransactions.Select(t => new TransactionDto
+                Orders = customer.PurchaseSalesOrders.Select(po => new PurchaseSalesOrderDto
                 {
-                    TransactionId = t.TransactionId,
-                    Type = t.Type,
-                    DateTime = t.DateTime,
-                    SupplierId = t.SupplierId,
-                    CustomerId = t.CustomerId,
-
-                    Orders = t.PurchaseSalesOrders.Select(po => new PurchaseSalesOrderDto
+                    OrderId = po.OrderId,
+                    TransactionId = po.TransactionId,
+                    ProductId = po.ProductId,
+                    Quantity = po.Quantity,
+                    TotalAmount = po.TotalAmount,
+                    OrderType = po.OrderType,     // optional if Transaction exists
+                    SupplierId = po.Transaction?.SupplierId,
+                    UserId = po.UserId,
+                    SupplierName = po.Product?.Supplier?.Name,
+                    Product = po.Product != null ? new ProductCreateDto
                     {
-                        OrderId = po.OrderId,
-                        TransactionId = po.TransactionId,
-                        ProductId = po.ProductId,
-                        Quantity = po.Quantity,
-                        TotalAmount = po.TotalAmount,
-                        OrderType = t.Type,
-                        SupplierId = t.SupplierId,
-                        UserId = t.CustomerId,
-                        OrderDate = t.DateTime,
-
-                        // Supplier name from Product → Supplier
-                        SupplierName = po.Product?.Supplier != null ? po.Product.Supplier.Name : null,
-
-                        Product = po.Product != null ? new ProductReadDto
-                        {
-                            ProductId = po.Product.ProductId,
-                            Name = po.Product.Name,
-                            Category = po.Product.Category,
-                            Quantity = po.Product.Quantity
-                        } : null
-                    }).ToList()
+                        ProductId = po.Product.ProductId,
+                        Name = po.Product.Name,
+                        Category = po.Product.Category,
+                        Quantity = po.Product.Quantity
+                    } : null
                 }).ToList()
             };
 

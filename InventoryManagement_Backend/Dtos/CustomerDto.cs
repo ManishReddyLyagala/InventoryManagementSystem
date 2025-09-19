@@ -17,7 +17,8 @@
         public string EmailID { get; set; } = string.Empty;
         public string Role { get; set; } = "Customer";
 
-        public List<TransactionDto> Transactions { get; set; } = new();
+        //public List<TransactionDto> Transactions { get; set; } = new();
+        public List<PurchaseSalesOrderDto> Orders { get; set; } = new List<PurchaseSalesOrderDto>();
     }
 
     //public class CreateCustomerDto
