@@ -39,7 +39,7 @@ namespace InventoryManagement_Backend.Services
                 .ToListAsync();
         }
 
-        public async Task<TransactionDto?> GetByIdAsync(int id)
+        public async Task<IEnumerable<TransactionDto?>> GetByIdAsync(int id)
         {
             if (id <= 0) throw new ArgumentException("Invalid transaction ID.");
 
@@ -58,8 +58,7 @@ namespace InventoryManagement_Backend.Services
                     TotalAmount = o.TotalAmount,
                     SupplierId = o.SupplierId,
                     UserId = o.UserId
-                })
-                .FirstOrDefaultAsync();
+                }).ToListAsync();
         }
 
         public async Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int userId)
