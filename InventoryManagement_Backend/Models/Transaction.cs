@@ -14,7 +14,7 @@ namespace InventoryManagement_Backend.Models
         /// 'P' = Purchase, 'S' = Sale
         /// </summary>
         [Required]
-        public char Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         [Required]
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
@@ -24,7 +24,7 @@ namespace InventoryManagement_Backend.Models
         public Supplier? Supplier { get; set; }
 
         public int? CustomerId { get; set; }
-        public Customer? Customer { get; set; }
+        public Customers? Customer { get; set; }
 
         // Navigation: 1 transaction => many PurchaseOrder lines
         public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();

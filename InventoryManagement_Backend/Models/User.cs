@@ -28,6 +28,8 @@ namespace InventoryManagement_Backend.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Navigation
-        //public ICollection<Transaction> SalesTransactions { get; set; } = new List<Transaction>();
-    }
+        public ICollection<Transaction> SalesTransactions { get; set; } = new List<Transaction>();
+        public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();
+    
+}
 }
