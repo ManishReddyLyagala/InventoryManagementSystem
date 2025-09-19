@@ -1,0 +1,38 @@
+{
+  "auth": {
+    "login": "/api/auth/login",
+    "logout": "/api/auth/logout",
+    "me": "/api/auth/me"
+  },
+  "products": {
+    "list": "http://localhost:5046/api/Products",
+    "get": "/api/products/{id}",
+    "create": "/api/products",
+    "update": "/api/products/{id}",
+    "delete": "/api/products/{id}"   
+  },
+  "orders": {
+    "list": "/api/orders",
+    "get": "/api/orders/{id}",
+    "create": "/api/orders",
+    "update": "/api/orders/{id}"
+  },
+  "transactions": {
+    "list": "/api/transactions",
+    "create": "/api/transactions"
+  },
+  "analytics": {
+    "overview": "/api/analytics/overview",
+    "sales": "/api/analytics/sales"
+  },
+  "stock": {
+    "list": "/api/stock",
+    "adjust": "/api/stock/adjust"
+  },
+  "users": {
+    "list": "/api/users",
+    "get": "/api/users/{id}",
+    "create": "/api/users",
+    "update": "/api/users/{id}"
+  }
+}

@@ -1,0 +1,2 @@
+export interface CustomerInterface {
+}
