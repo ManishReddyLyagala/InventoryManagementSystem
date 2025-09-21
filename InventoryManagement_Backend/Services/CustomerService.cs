@@ -55,7 +55,7 @@ namespace InventoryManagement_Backend.Services
                     Quantity = po.Quantity,
                     TotalAmount = po.TotalAmount,
                     OrderType = po.OrderType,     // optional if Transaction exists
-                    SupplierId = po.Transaction?.SupplierId,
+                    //SupplierId = po.Transaction?.SupplierId,
                     UserId = po.UserId,
                     SupplierName = po.Product?.Supplier?.Name,
                     Product = po.Product != null ? new ProductCreateDto

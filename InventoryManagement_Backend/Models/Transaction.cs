@@ -1,10 +1,16 @@
-﻿using InventoryManagement_Backend.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryManagement_Backend.Models
 {
+    public enum TransactionStatus
+    {
+        Pending,
+        Completed,
+        Cancelled
+    }
+
     public class Transaction
     {
         [Key]
@@ -14,17 +20,13 @@ namespace InventoryManagement_Backend.Models
         /// 'P' = Purchase, 'S' = Sale
         /// </summary>
         [Required]
-        public string Type { get; set; } = string.Empty;
+        public string TransactionType { get; set; } = string.Empty;
 
         [Required]
-        public DateTime DateTime { get; set; } = DateTime.UtcNow;
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
 
-        // Nullable depending on Type
-        public int? SupplierId { get; set; }
-        public Supplier? Supplier { get; set; }
-
-        public int? CustomerId { get; set; }
-        public Customers? Customer { get; set; }
+        [Required]
+        public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
 
         // Navigation: 1 transaction => many PurchaseOrder lines
         public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();
