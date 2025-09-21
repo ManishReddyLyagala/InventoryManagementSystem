@@ -64,7 +64,7 @@ namespace InventoryManagement_Backend.Controllers
             };
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet] // GET: api/PurchaseSalesOrders
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetAllOrders()
         {

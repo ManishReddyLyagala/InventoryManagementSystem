@@ -61,6 +61,7 @@ namespace InventoryManagement_Backend.Services
                         Quantity = p.Quantity,
                         ImageUrl = p.ImageUrl,
                         //SupplierId = p.SupplierId
+                        Price = p.Price
                     }).ToList()
                 })
                 .AsNoTracking()
@@ -87,13 +88,14 @@ namespace InventoryManagement_Backend.Services
                 Name = supplier.Name,
                 MobileNumber = supplier.MobileNumber,
                 EmailID = supplier.EmailID,
-                ProductCategory = supplier.ProductCategory
+                ProductCategory = supplier.ProductCategory,
+                //Price = supplie
             };
         }
 
         public async Task<bool> PatchAsync(int id, SupplierUpdateDto dto)
         {
-            if (id != dto.SupplierId) return false;
+            //if (id != dto.SupplierId) return false;
 
             var existing = await _context.Suppliers.FindAsync(id);
             if (existing == null) return false;
@@ -101,7 +103,7 @@ namespace InventoryManagement_Backend.Services
             if (!string.IsNullOrEmpty(dto.Name))
                 existing.Name = dto.Name;
 
-            if (!string.IsNullOrEmpty(dto.EmailID))
+            if (!string.IsNullOrEmpty(dto.MobileNumber))
                 existing.MobileNumber = dto.MobileNumber; 
 
             if (!string.IsNullOrEmpty(dto.EmailID))

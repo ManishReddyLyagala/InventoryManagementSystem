@@ -18,13 +18,14 @@ namespace InventoryManagement_Backend.Controllers
             _supplierService = supplierService;
         }
 
+        //[Authorize (Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupplierReadDto>>> GetSuppliers()
         {
             var suppliers = await _supplierService.GetAllAsync();
             if (suppliers == null || !suppliers.Any())
-                return NotFound(new { message = "No suppliers found." });
-            return Ok(await _supplierService.GetAllAsync());
+                return NotFound(new { message = "No suppliers found. eiruyiuewro" });
+            return Ok(suppliers);
         }
 
         [HttpGet("{id}")]
