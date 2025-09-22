@@ -1,4 +1,5 @@
-﻿using InventoryManagement_Backend.Models;
+﻿using InventoryManagement.Models;
+using InventoryManagement_Backend.Models;
 
 namespace InventoryManagement_Backend.Dtos
 {
@@ -28,15 +29,16 @@ namespace InventoryManagement_Backend.Dtos
         public string OrderType { get; set; } // "Sales" or "Purchase"
         public int? SupplierId { get; set; }
         public int? UserId { get; set; }
-        public User User { get; set; }
+        //public User User { get; set; }
         public DateTime OrderDate { get; set; }
 
         // For readability in response
         public string? ProductName { get; set; }
         public string? SupplierName { get; set; }
         public string? CustomerName { get; set; }
-        public ProductCreateDto Product { get;  set; }
+        //public ProductCreateDto Product { get;  set; }
         
+
 
     }
 }

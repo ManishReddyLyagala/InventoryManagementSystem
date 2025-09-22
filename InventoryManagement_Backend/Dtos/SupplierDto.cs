@@ -10,6 +10,8 @@ namespace InventoryManagement_Backend.Dtos
         public string MobileNumber { get; set; }
         public string EmailID { get; set; } = string.Empty;
         public string ProductCategory { get; set; } = string.Empty;
+        public string SupplierCategory { get; set; }
+
     }
     // For reading/displaying supplier data
     public class SupplierbyIDReadDto

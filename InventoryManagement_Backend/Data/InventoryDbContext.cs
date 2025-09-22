@@ -42,6 +42,16 @@ namespace InventoryManagement_Backend.Data
                 .HasForeignKey(po => po.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Supplier>()
+                .HasMany(s => s.SupplierOrders)
+                .WithOne(so => so.Supplier)
+                .HasForeignKey(so => so.SupplierId);
+
+            modelBuilder.Entity<PurchaseSalesOrders>()
+                .HasMany(p => p.SupplierOrders)
+                .WithOne(so => so.PurchaseSalesOrder)
+                .HasForeignKey(so => so.OrderId);
+
             // Transaction -> Customer (nullable)
             //modelBuilder.Entity<Transaction>()
             //    .HasOne(t => t.Customer)
@@ -78,6 +88,11 @@ namespace InventoryManagement_Backend.Data
                 .HasOne(s => s.SupplierCategory)
                 .WithOne(sc => sc.Supplier)
                 .HasForeignKey<SupplierCategory>(sc => sc.SupplierId);
+
+            modelBuilder.Entity<SupplierCategory>()
+                .Property(sc => sc.Category)
+                .HasConversion<string>();
+
 
             //modelBuilder.Entity<PurchaseSalesOrders>()
             //    .HasOne(p => p.Customer)
