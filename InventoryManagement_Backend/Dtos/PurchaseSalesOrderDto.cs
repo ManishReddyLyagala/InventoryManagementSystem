@@ -35,6 +35,7 @@ namespace InventoryManagement_Backend.Dtos
         // For readability in response
         public string? ProductName { get; set; }
         public string? SupplierName { get; set; }
+        public string? UserName { get; set; }
         //public ProductCreateDto Product { get;  set; }
         
 

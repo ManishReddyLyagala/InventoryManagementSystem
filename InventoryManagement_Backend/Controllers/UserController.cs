@@ -15,7 +15,7 @@ namespace InventoryManagement_Backend.Controllers
             _service = service;
         }
 
-        // GET: api/customers
+        // GET: api/user
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsers()
         {
@@ -23,9 +23,9 @@ namespace InventoryManagement_Backend.Controllers
             return Ok(users);
         }
 
-        // GET: api/customers/{id}
+        // GET: api/user/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserByIDReadDto>> GetCustomer(int id)
+        public async Task<ActionResult<UserByIDReadDto>> GetUser(int id)
         {
             var user = await _service.GetUserByIdAsync(id);
             if (user == null) return NotFound();
@@ -58,7 +58,7 @@ namespace InventoryManagement_Backend.Controllers
         //    return NoContent();
         //}
 
-        // DELETE: api/customers/{id}
+        // DELETE: api/user/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
