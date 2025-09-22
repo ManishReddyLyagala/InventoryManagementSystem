@@ -52,7 +52,7 @@ namespace InventoryManagement_Backend.Services
         public async Task<bool> DeleteUserAsync(int id)
         {
             var user = await _context.User
-                                         .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Customer");
+                                         .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null) return false;
 
