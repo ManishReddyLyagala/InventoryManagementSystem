@@ -1,11 +1,12 @@
-﻿using System;
+﻿using InventoryManagement.Dtos;
+using InventoryManagement.Models;
+using InventoryManagement_Backend.Data;
+using InventoryManagement_Backend.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using InventoryManagement.Dtos;
-using InventoryManagement.Models;
-using InventoryManagement_Backend.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryManagement.Services
 {
@@ -18,64 +19,62 @@ namespace InventoryManagement.Services
             _context = context;
         }
 
-        public async Task<List<SupplierCategoryDto>> GetAllCategoriesAsync()
+        public async Task UpdateSupplierCategoriesAsync()
         {
-            return await _context.SupplierCategories
-                .Include(sc => sc.Supplier)
-                .Select(sc => new SupplierCategoryDto
-                {
-                    SupplierId = sc.SupplierId,
-                    SupplierName = sc.Supplier.Name,
-                    ProductCategory = sc.Supplier.ProductCategory,
-                    Category = sc.Category.ToString(),
-                    LastUpdated = sc.LastUpdated
-                })
+            var suppliers = await _context.Suppliers
+                .Include(s => s.SupplierOrders)
+                .Include(s => s.SupplierCategory)
                 .ToListAsync();
-        }
 
-        public async Task<SupplierCategoryDto?> GetBySupplierIdAsync(int supplierId)
-        {
-            var sc = await _context.SupplierCategories
-                .Include(sc => sc.Supplier)
-                .FirstOrDefaultAsync(sc => sc.SupplierId == supplierId);
-
-            if (sc == null) return null;
-
-            return new SupplierCategoryDto
+            foreach (var supplier in suppliers)
             {
-                SupplierId = sc.SupplierId,
-                SupplierName = sc.Supplier.Name,
-                ProductCategory = sc.Supplier.ProductCategory,
-                Category = sc.Category.ToString(),
-                LastUpdated = sc.LastUpdated
-            };
-        }
-
-        public async Task<bool> UpdateCategoryAsync(UpdateSupplierCategoryDto dto)
-        {
-            var supplierCategory = await _context.SupplierCategories
-                .FirstOrDefaultAsync(sc => sc.SupplierId == dto.SupplierId);
-
-            if (supplierCategory == null)
-            {
-                // If not exists, create a new record
-                var newCategory = new SupplierCategory
+                if (supplier.SupplierOrders == null || supplier.SupplierOrders.Count == 0)
                 {
-                    SupplierId = dto.SupplierId,
-                    Category = Enum.Parse<SupplierCategoryType>(dto.Category, true),
-                    LastUpdated = DateTime.UtcNow
-                };
-                _context.SupplierCategories.Add(newCategory);
-            }
-            else
-            {
-                supplierCategory.Category = Enum.Parse<SupplierCategoryType>(dto.Category, true);
-                supplierCategory.LastUpdated = DateTime.UtcNow;
-                _context.SupplierCategories.Update(supplierCategory);
+                    SetCategory(supplier, SupplierCategoryType.New);
+                    continue;
+                }
+
+                int totalOrders = supplier.SupplierOrders.Count;
+                int onTimeOrders = supplier.SupplierOrders
+                    .Count(o => o.ActualDeliveryDate.Date <= o.ExpectedDeliveryDate.Date);
+
+                
+                double onTimeRate = (double)onTimeOrders / totalOrders * 100;
+                Console.WriteLine("###############################################################");
+                Console.WriteLine(onTimeRate);
+
+                SupplierCategoryType newCategory;
+                if (onTimeRate >= 90)
+                    newCategory = SupplierCategoryType.Preferred;
+                else if (onTimeRate >= 60)
+                    newCategory = SupplierCategoryType.Backup;
+                else
+                    newCategory = SupplierCategoryType.HighRisk;
+
+                SetCategory(supplier, newCategory);
             }
 
             await _context.SaveChangesAsync();
-            return true;
+        }
+
+        private void SetCategory(Supplier supplier, SupplierCategoryType category)
+        {
+            if (supplier.SupplierCategory == null)
+            {
+                supplier.SupplierCategory = new SupplierCategory
+                {
+                    SupplierId = supplier.SupplierId,
+                    Category = category,
+                    LastUpdated = DateTime.UtcNow
+                };
+                _context.SupplierCategories.Add(supplier.SupplierCategory);
+            }
+            else
+            {
+                supplier.SupplierCategory.Category = category;
+                supplier.SupplierCategory.LastUpdated = DateTime.UtcNow;
+                _context.SupplierCategories.Update(supplier.SupplierCategory);
+            }
         }
     }
 }

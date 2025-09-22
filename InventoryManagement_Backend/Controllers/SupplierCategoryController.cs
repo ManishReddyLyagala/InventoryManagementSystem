@@ -17,26 +17,11 @@ namespace InventoryManagement.Controllers
             _service = service;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<SupplierCategoryDto>>> GetAll()
+        [HttpPost("recalculate")]
+        public async Task<IActionResult> RecalculateCategories()
         {
-            return await _service.GetAllCategoriesAsync();
-        }
-
-        [HttpGet("{supplierId}")]
-        public async Task<ActionResult<SupplierCategoryDto>> GetBySupplierId(int supplierId)
-        {
-            var result = await _service.GetBySupplierIdAsync(supplierId);
-            if (result == null) return NotFound();
-            return result;
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> UpdateCategory(UpdateSupplierCategoryDto dto)
-        {
-            var updated = await _service.UpdateCategoryAsync(dto);
-            if (!updated) return BadRequest();
-            return Ok("Category updated successfully.");
+            await _service.UpdateSupplierCategoriesAsync();
+            return Ok("Supplier categories recalculated successfully.");
         }
     }
-}
+    }
