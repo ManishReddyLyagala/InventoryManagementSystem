@@ -1,6 +1,6 @@
 ﻿namespace InventoryManagement_Backend.Dtos
 {
-    public class CustomerReadDto
+    public class UserReadDto
     {
         public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -10,7 +10,7 @@
         public string? Address { get; set; }
     }
 
-    public class CustomerByIDReadDto
+    public class UserByIDReadDto
     {
         public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -20,7 +20,7 @@
         public string? Address { get; set; }
 
         //public List<TransactionDto> Transactions { get; set; } = new();
-        public List<PurchaseSalesOrderDto> Orders { get; set; } = new List<PurchaseSalesOrderDto>();
+        //public List<PurchaseSalesOrderDto> Orders { get; set; } = new List<PurchaseSalesOrderDto>();
     }
 
     //public class CreateCustomerDto

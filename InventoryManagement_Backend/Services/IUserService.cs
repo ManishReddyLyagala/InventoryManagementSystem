@@ -2,13 +2,13 @@
 
 namespace InventoryManagement_Backend.Services.Interfaces
 {
-    public interface ICustomerService
+    public interface IUserService
     {
-        Task<IEnumerable<CustomerReadDto>> GetAllCustomersAsync();
-        Task<CustomerByIDReadDto?> GetCustomerByIdAsync(int id);
+        Task<IEnumerable<UserReadDto>> GetAllUsersAsync();
+        Task<UserByIDReadDto?> GetUserByIdAsync(int id);
         //Task<CustomerReadDto> CreateCustomerAsync(CreateCustomerDto dto);
         //Task<bool> UpdateCustomerAsync(int id, UpdateCustomerDto dto);
-        Task<bool> DeleteCustomerAsync(int id);
+        Task<bool> DeleteUserAsync(int id);
     }
 }
 

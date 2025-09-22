@@ -39,7 +39,7 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 //// Register services
 builder.Services.AddScoped<ISupplierService, SupplierService>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<SupplierCategoryService>();
 
 //builder.Services.AddScoped<ICustomerService, CustomerService>();

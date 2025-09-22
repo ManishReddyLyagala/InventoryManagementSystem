@@ -6,28 +6,28 @@ namespace InventoryManagement_Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CustomersController : ControllerBase
+    public class UserController : ControllerBase
     {
-        private readonly ICustomerService _service;
+        private readonly IUserService _service;
 
-        public CustomersController(ICustomerService service)
+        public UserController(IUserService service)
         {
             _service = service;
         }
 
         // GET: api/customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerReadDto>>> GetAllCustomers()
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllCustomers()
         {
-            var customers = await _service.GetAllCustomersAsync();
+            var customers = await _service.GetAllUsersAsync();
             return Ok(customers);
         }
 
         // GET: api/customers/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerByIDReadDto>> GetCustomer(int id)
+        public async Task<ActionResult<UserByIDReadDto>> GetCustomer(int id)
         {
-            var customer = await _service.GetCustomerByIdAsync(id);
+            var customer = await _service.GetUserByIdAsync(id);
             if (customer == null) return NotFound();
             return Ok(customer);
         }
@@ -58,13 +58,13 @@ namespace InventoryManagement_Backend.Controllers
         //    return NoContent();
         //}
 
-        //// DELETE: api/customers/{id}
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteCustomer(int id)
-        //{
-        //    var success = await _service.DeleteCustomerAsync(id);
-        //    if (!success) return NotFound();
-        //    return NoContent();
-        //}
+        // DELETE: api/customers/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            var success = await _service.DeleteUserAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
     }
 }

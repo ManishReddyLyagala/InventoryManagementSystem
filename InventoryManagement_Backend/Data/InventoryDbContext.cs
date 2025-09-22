@@ -40,7 +40,7 @@ namespace InventoryManagement_Backend.Data
                 .HasMany(u => u.PurchaseSalesOrders)
                 .WithOne(po => po.User)
                 .HasForeignKey(po => po.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Supplier>()
                 .HasMany(s => s.SupplierOrders)
