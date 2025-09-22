@@ -25,6 +25,7 @@ namespace InventoryManagement_Backend.Services
                     MobileNumber = s.MobileNumber,
                     EmailID = s.EmailID,
                     ProductCategory = s.ProductCategory,
+                    SupplierCategory = s.SupplierCategory != null ? s.SupplierCategory.Category.ToString() : "New"
                     //Products = s.Products.Select(p => new ProductReadDto
                     //{
                     //    ProductId = p.ProductId,

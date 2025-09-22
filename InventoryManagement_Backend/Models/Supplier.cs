@@ -22,6 +22,7 @@ namespace InventoryManagement_Backend.Models
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<Transaction> PurchaseTransactions { get; set; } = new List<Transaction>();
         public SupplierCategory SupplierCategory { get; set; }
+        public ICollection<SupplierOrder> SupplierOrders { get; set; }
 
 
     }

@@ -1,4 +1,4 @@
-﻿using InventoryManagement_Backend.Models;
+﻿using InventoryManagement.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -38,5 +38,6 @@ namespace InventoryManagement_Backend.Models
         public Supplier Supplier { get; set; }
         public User User { get; set; }
         public Transaction Transaction { get; set; }
+        public ICollection<SupplierOrder> SupplierOrders { get; set; }
     }
 }

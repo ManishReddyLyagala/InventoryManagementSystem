@@ -58,13 +58,14 @@ namespace InventoryManagement_Backend.Services
                     //SupplierId = po.Transaction?.SupplierId,
                     UserId = po.UserId,
                     SupplierName = po.Product?.Supplier?.Name,
-                    Product = po.Product != null ? new ProductCreateDto
-                    {
-                        ProductId = po.Product.ProductId,
-                        Name = po.Product.Name,
-                        Category = po.Product.Category,
-                        Quantity = po.Product.Quantity
-                    } : null
+                    ProductName = po.Product.Name,
+                    //Product = po.Product != null ? new ProductCreateDto
+                    //{
+                    //    ProductId = po.Product.ProductId,
+                    //    Name = po.Product.Name,
+                    //    Category = po.Product.Category,
+                    //    Quantity = po.Product.Quantity
+                    //} : null
                 }).ToList()
             };
 
