@@ -44,7 +44,7 @@ namespace InventoryManagement_Backend.Controllers
                 OrderDate = order.OrderDate,
                 ProductName = order.Product?.Name,
                 SupplierName = order.Supplier?.Name,
-                CustomerName = order.User?.Name
+                UserName = order.User?.Name
             };
         }
 
@@ -64,7 +64,7 @@ namespace InventoryManagement_Backend.Controllers
             };
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet] // GET: api/PurchaseSalesOrders
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetAllOrders()
         {
