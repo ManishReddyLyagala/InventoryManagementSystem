@@ -1,8 +1,7 @@
 ﻿using InventoryManagement_Backend.Data;
-using Microsoft.AspNetCore.Http;
+using InventoryManagement_Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Mail;
 
 namespace InventoryManagement_Backend.Controllers
 {
@@ -11,10 +10,12 @@ namespace InventoryManagement_Backend.Controllers
     public class SupplierEmailController : ControllerBase
     {
         private readonly InventoryDbContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public SupplierEmailController(InventoryDbContext context)
+        public SupplierEmailController(InventoryDbContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         [HttpPost("send/{supplierId}")]
@@ -27,22 +28,14 @@ namespace InventoryManagement_Backend.Controllers
             if (supplier == null)
                 return NotFound("Supplier not found");
 
+            if (string.IsNullOrEmpty(supplier.EmailID))
+                return BadRequest("Supplier does not have an email address");
+
             try
             {
-                var message = new MailMessage
-                {
-                    From = new MailAddress("yourgmail@gmail.com"),
-                    Subject = request.Subject,
-                    Body = $"{request.Body}"
-                };
-                message.To.Add("charishmapaluri3904@gmail.com");
+                var recipients = new List<string> { "charishmapaluri3904@gmail.com" };
 
-                using (var smtp = new SmtpClient("smtp.gmail.com", 587))
-                {
-                    smtp.Credentials = new System.Net.NetworkCredential("charishmapaluri@gmail.com", "gieaulrxbdrtdynx");
-                    smtp.EnableSsl = true;
-                    await smtp.SendMailAsync(message);
-                }
+                await _emailSender.SendEmailAsync(request.Subject, request.Body, recipients);
 
                 return Ok(new { message = "Email sent successfully" });
             }
@@ -52,14 +45,11 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-
         // DTO
         public class SupplierEmailRequest
         {
             public string Subject { get; set; } = string.Empty;
             public string Body { get; set; } = string.Empty;
         }
-
-
     }
 }

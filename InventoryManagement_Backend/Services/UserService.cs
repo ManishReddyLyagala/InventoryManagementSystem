@@ -17,9 +17,9 @@ namespace InventoryManagement_Backend.Services
 
         public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync()
         {
-            var customers = await _context.User.ToListAsync();
+            var users = await _context.User.ToListAsync();
 
-            return customers.Select(u => new UserReadDto
+            return users.Select(u => new UserReadDto
             {
                 UserId = u.UserId,
                 Name = u.Name,

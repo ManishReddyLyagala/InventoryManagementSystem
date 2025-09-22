@@ -17,19 +17,19 @@ namespace InventoryManagement_Backend.Controllers
 
         // GET: api/customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllCustomers()
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsers()
         {
-            var customers = await _service.GetAllUsersAsync();
-            return Ok(customers);
+            var users = await _service.GetAllUsersAsync();
+            return Ok(users);
         }
 
         // GET: api/customers/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<UserByIDReadDto>> GetCustomer(int id)
         {
-            var customer = await _service.GetUserByIdAsync(id);
-            if (customer == null) return NotFound();
-            return Ok(customer);
+            var user = await _service.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
         }
 
         //// GET: api/customers/{id}/transactions
@@ -60,7 +60,7 @@ namespace InventoryManagement_Backend.Controllers
 
         // DELETE: api/customers/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             var success = await _service.DeleteUserAsync(id);
             if (!success) return NotFound();
