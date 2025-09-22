@@ -27,6 +27,8 @@ namespace InventoryManagement_Backend.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public string? Address { get; set; } 
         // Navigation
         public ICollection<Transaction> SalesTransactions { get; set; } = new List<Transaction>();
         public ICollection<PurchaseSalesOrders> PurchaseSalesOrders { get; set; } = new List<PurchaseSalesOrders>();

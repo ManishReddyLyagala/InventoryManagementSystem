@@ -25,7 +25,8 @@ namespace InventoryManagement_Backend.Services
                 Name = u.Name,
                 MobileNumber = u.MobileNumber,
                 EmailID = u.EmailID,
-                Role = u.Role
+                Role = u.Role,
+                Address = u.Address
             }).ToList();
         }
 
@@ -47,6 +48,7 @@ namespace InventoryManagement_Backend.Services
                 MobileNumber = customer.MobileNumber,
                 EmailID = customer.EmailID,
                 Role = customer.Role,
+                Address = customer.Address,
                 Orders = customer.PurchaseSalesOrders.Select(po => new PurchaseSalesOrderDto
                 {
                     OrderId = po.OrderId,
