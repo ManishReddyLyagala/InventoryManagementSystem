@@ -11,11 +11,17 @@ namespace InventoryManagement_Backend.Dtos
 
         public int OrderId { get; set; }
         public int ProductId { get; set; }
+
+        public string ProductName { get; set; }
         public int Quantity { get; set; }
         public decimal TotalAmount { get; set; }
 
         public int? SupplierId { get; set; }
-        public int? UserId { get; set; }
+        public int? CustomerId { get; set; }
+
+        public string? CustomerName { get; set; }
+
+        public string? SupplierName { get; set; }
 
         public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
     }
