@@ -95,6 +95,7 @@ namespace InventoryManagement_Backend.Services
             {
                 Token = jwt,
                 UserName = user.Name,
+                UserId = user.UserId,
                 Role = user.Role,
                 ExpiresAt = tokenDescriptor.Expires ?? DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes)
             };

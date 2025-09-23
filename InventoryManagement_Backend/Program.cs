@@ -1,12 +1,10 @@
 using Hangfire;
-using Hangfire;
-using Hangfire.SqlServer;
 using Hangfire.SqlServer;
 using InventoryManagement.Services;
 using InventoryManagement_Backend.Data;
 using InventoryManagement_Backend.Services;
 using InventoryManagement_Backend.Services.Interfaces;
-using InventoryManagement_Backend.Services.Interfaces;
+//using InventoryManagement_Backend.Services.Interfaces;
 using InventoryManagement_Backend.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

@@ -7,7 +7,7 @@ namespace InventoryManagement_Backend.Services.Interfaces
         Task<IEnumerable<UserReadDto>> GetAllUsersAsync();
         Task<UserByIDReadDto?> GetUserByIdAsync(int id);
         //Task<CustomerReadDto> CreateCustomerAsync(CreateCustomerDto dto);
-        //Task<bool> UpdateCustomerAsync(int id, UpdateCustomerDto dto);
+        Task<UserByIDReadDto> UpdateUserAsync(int id, UpdateCustomerDto dto);
         Task<bool> DeleteUserAsync(int id);
     }
 }

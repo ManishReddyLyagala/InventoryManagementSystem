@@ -44,7 +44,8 @@ namespace InventoryManagement_Backend.Services
                 Name = user.Name,
                 MobileNumber = user.MobileNumber,
                 EmailID = user.EmailID,
-                Address = user.Address
+                Address = user.Address,
+                Role= user.Role
                 
             };
 
@@ -59,6 +60,28 @@ namespace InventoryManagement_Backend.Services
             _context.User.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<UserByIDReadDto> UpdateUserAsync(int userId, UpdateCustomerDto userDetail)
+        {
+            var userData = await _context.User.FindAsync(userId);
+            if (userData == null) return null;
+            userData.Name = userDetail.Name;
+            userData.EmailID = userDetail.Email;
+            userData.MobileNumber = userDetail.MobileNumber;
+            userData.Address = userDetail.Address;
+            await _context.SaveChangesAsync();
+            return new UserByIDReadDto
+            {
+                UserId = userData.UserId,
+                Name = userData.Name,
+                MobileNumber = userData.MobileNumber,
+                EmailID = userData.EmailID,
+                Address = userData.Address,
+                Role = userData.Role,
+                CreatedAt = userData.CreatedAt
+
+            };
         }
     }
 }
