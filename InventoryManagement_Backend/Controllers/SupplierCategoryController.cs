@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using InventoryManagement.Dtos;
 using InventoryManagement.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement.Controllers
@@ -17,6 +18,7 @@ namespace InventoryManagement.Controllers
             _service = service;
         }
 
+        [Authorize]
         [HttpPost("recalculate")]
         public async Task<IActionResult> RecalculateCategories()
         {

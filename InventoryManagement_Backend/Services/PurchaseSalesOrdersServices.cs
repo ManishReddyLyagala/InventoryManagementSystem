@@ -42,6 +42,10 @@ namespace InventoryManagement_Backend.Services
                 .Include(p => p.User)
                 .ToListAsync();
 
+       public async Task<IEnumerable<PurchaseSalesOrders>> GetUserOrders(int userId)
+        {
+            return await _context.PurchaseSalesOrders.Where(o => o.UserId == userId).Include(p=>p.Product).ToListAsync();
+        }
         public async Task<List<PurchaseSalesOrders>> CreateOrderAsync(OrderCreateRequest orderRequest)
         {
             var CreatedOrders = new List<PurchaseSalesOrders>();
@@ -190,7 +194,11 @@ namespace InventoryManagement_Backend.Services
                     TotalAmount = (decimal?)g.Sum(o=>o.TotalAmount) ?? 0
                 }).ToListAsync();
         }
-        
-        
+
+        public async Task<int> GetTotalProductsSold()
+        {
+            return await _context.PurchaseSalesOrders.Where(o => o.OrderType == "S").SumAsync(o => o.Quantity);
+        }
+
     }
 }

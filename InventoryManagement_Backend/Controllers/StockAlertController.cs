@@ -1,5 +1,6 @@
 ﻿using InventoryManagement_Backend.Data;
 using InventoryManagement_Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ namespace InventoryManagement_Backend.Controllers
         {
            _stockAlertService = stockAlertService;
         }
-
+        [Authorize]
         [HttpGet("lowstock")]
         public async Task<IActionResult> GetLowStock([FromQuery] int threshold = 5)
         {
@@ -23,6 +24,7 @@ namespace InventoryManagement_Backend.Controllers
             return Ok(products);
         }
 
+        [Authorize]
         [HttpPost("Send")]
         public async Task<IActionResult> SendLowStockEmail([FromQuery] int threshold = 5)
         {
