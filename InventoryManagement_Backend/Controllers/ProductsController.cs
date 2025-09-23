@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services;
-using InventoryManagement_Backend.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement_Backend.Controllers
 {
@@ -16,6 +17,7 @@ namespace InventoryManagement_Backend.Controllers
             _productservice = productservices;
         }
 
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet]
         public async Task<ActionResult<IList<ProductCreateDto>>> getproducts()
         {
@@ -34,6 +36,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<string>> addproduct([FromBody] ProductCreateDto new_product)
         {
@@ -75,7 +78,7 @@ namespace InventoryManagement_Backend.Controllers
                     return NotFound("Supplier Id does not exist");
                 }
 
-                return CreatedAtAction(nameof(get_productby_id), new { id = supplier_exist }, "Added successfully");
+                return CreatedAtAction(nameof(get_productby_id), new { id = supplier_exist }, new { message = "Added successfully" });
             }
             catch (Exception ex)
             {
@@ -83,7 +86,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<product_supplier>> get_productby_id(int id)
         {
@@ -104,6 +107,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet("{id}/quantity")]
         public async Task<ActionResult<int>> get_qunatity(int id)
         {
@@ -121,6 +125,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<string>> del_product(int id)
         {
@@ -131,7 +136,7 @@ namespace InventoryManagement_Backend.Controllers
                 bool b = await _productservice.del_product(id);
                 if (b)
                 {
-                    return Ok("Deleted successfully");
+                    return Ok(new { message = "Deleted successfully" });
                 }
                 else { return NotFound("Product Id does not exist"); }
             }
@@ -141,8 +146,9 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin, Customer")]
         [HttpPatch("{id}/update_qunatity")]
-        public async Task<ActionResult<bool>> update_quantity(int id, int inc_dec, [FromQuery] int threshold=10)
+        public async Task<ActionResult<bool>> update_quantity(int id, int inc_dec, [FromQuery] int threshold = 10)
         {
             try
             {
@@ -158,6 +164,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ProductCreateDto>> update_product(int id, [FromBody] ProductCreateDto new_product)
         {
@@ -205,7 +212,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}/change_supplier")]
         public async Task<ActionResult<string>> change_supplier(int id, int supplier_id)
         {
@@ -224,6 +231,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("get_stocks")]
         public async Task<ActionResult<Low_High_Stocks>> get_stocks([FromQuery] int threshold = 10)
         {
@@ -238,7 +246,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet("{type}/filter_products")]
         public async Task<ActionResult<IList<ProductCreateDto>>> filter_products_type(string type)
         {
@@ -258,6 +266,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet("search")]
         public async Task<ActionResult<IList<ProductCreateDto>>> Search(string name)
         {
@@ -277,6 +286,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin, Customer")]
         [HttpGet("pagination")]
         public async Task<IActionResult> GetProducts(int page = 1, int pageSize = 5)
         {
@@ -287,6 +297,39 @@ namespace InventoryManagement_Backend.Controllers
 
                 var result = await _productservice.GetPagedProducts(page, pageSize);
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Admin, Customer")]
+        [HttpGet("product_supplier")]
+        public async Task<ActionResult<product_supplier>> get_product_supplier(int id)
+        {
+            try
+            {
+                if (id <= 0) return BadRequest("Id cannot be <=0");
+                var product = await _productservice.get_product_supplier(id);
+                if (product == null) return NotFound("Id doesnot exists");
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Admin, Customer")]
+        [HttpGet("get_all_product_supplier")]
+        public async Task<ActionResult<List<product_supplier>>> get_all_product_supplier()
+        {
+            try
+            {
+                var product = await _productservice.get_all_product_supplier();
+                if (product == null) return NotFound("Products doesnot exists");
+                return Ok(product);
             }
             catch (Exception ex)
             {
