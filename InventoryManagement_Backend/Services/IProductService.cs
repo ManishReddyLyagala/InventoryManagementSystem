@@ -1,6 +1,7 @@
 ﻿using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace InventoryManagement_Backend.Services
 {
@@ -18,5 +19,7 @@ namespace InventoryManagement_Backend.Services
         Task<IList<ProductCreateDto>> filter(string category);
         Task<IList<ProductCreateDto>> search(string keyword);
         Task<object> GetPagedProducts(int page, int pageSize = 5);
+        Task<product_supplier> get_product_supplier(int id);
+        Task<IList<product_supplier>> get_all_product_supplier();
     }
 }

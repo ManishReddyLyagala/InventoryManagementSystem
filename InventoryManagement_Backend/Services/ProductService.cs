@@ -77,7 +77,14 @@ namespace InventoryManagement_Backend.Services
             else
             {
                 _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"##################################################################Internal server error: {ex.Message}");
+                }
                 return true;
             }
         }
@@ -92,16 +99,24 @@ namespace InventoryManagement_Backend.Services
         public async Task<bool> update_quantity(int id, int inc_dec, int threshold)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
-            int quantity = product.Quantity + inc_dec;
+            if (product == null) return false;
+
+            int quantity = product.Quantity + inc_dec; // use inc_dec directly
+            Console.WriteLine($"Quantity: {quantity}, inc_dec: {inc_dec}");
+
             if (quantity < 0) return false;
+
             product.Quantity = quantity;
             await _context.SaveChangesAsync();
+
             if (product.Quantity < threshold)
             {
                 await _stockAlertService.SendDailyLowStockEmailAsync(threshold);
             }
+
             return true;
         }
+
 
         public async Task<bool> edit_product(int id, ProductCreateDto new_product)
         {
@@ -227,6 +242,55 @@ namespace InventoryManagement_Backend.Services
                 TotalItems = totalItems,
                 Items = dtoProducts
             };
+        }
+
+        public async Task<product_supplier> get_product_supplier(int id)
+        {
+            var product = await _context.Products.Include(p => p.Supplier).FirstOrDefaultAsync(x => x.ProductId == id);
+            if (product == null) return null;
+            product_supplier p = new product_supplier
+            {
+                ProductId = product.ProductId,
+                Product_Name = product.Name,
+                Category = product.Category,
+                Description = product.Description,
+                ImageUrl = product.ImageUrl,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                SupplierId = product.SupplierId,
+                Supplier_Name = product.Supplier.Name,
+                MobileNumber = product.Supplier.MobileNumber,
+                EmailId = product.Supplier.EmailID,
+                S_category = product.Supplier.ProductCategory
+            };
+            return p;
+        }
+
+        public async Task<IList<product_supplier>> get_all_product_supplier()
+        {
+            var products = await _context.Products.Include(p => p.Supplier).ToListAsync();
+            if (products == null) return null;
+            List<product_supplier> p_s = new List<product_supplier>();
+            foreach (var product in products)
+            {
+                product_supplier p = new product_supplier
+                {
+                    ProductId = product.ProductId,
+                    Product_Name = product.Name,
+                    Category = product.Category,
+                    Description = product.Description,
+                    ImageUrl = product.ImageUrl,
+                    Price = product.Price,
+                    Quantity = product.Quantity,
+                    SupplierId = product.SupplierId,
+                    Supplier_Name = product.Supplier.Name,
+                    MobileNumber = product.Supplier.MobileNumber,
+                    EmailId = product.Supplier.EmailID,
+                    S_category = product.Supplier.ProductCategory
+                };
+                p_s.Add(p);
+            }
+            return p_s;
         }
     }
 }
