@@ -26,6 +26,8 @@
         public string MobileNumber { get; set; }
         public string EmailId { get; set; }
 
+        public string S_category { get; set; }
+
     }
     public class Low_High_Stocks
     {

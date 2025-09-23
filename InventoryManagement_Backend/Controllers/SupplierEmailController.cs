@@ -1,5 +1,6 @@
 ﻿using InventoryManagement_Backend.Data;
 using InventoryManagement_Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ namespace InventoryManagement_Backend.Controllers
             _emailSender = emailSender;
         }
 
+        [Authorize]
         [HttpPost("send/{supplierId}")]
         public async Task<IActionResult> SendEmailToSupplier(int supplierId, [FromBody] SupplierEmailRequest request)
         {

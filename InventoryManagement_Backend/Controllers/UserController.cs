@@ -1,5 +1,6 @@
 ﻿using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryManagement_Backend.Controllers
@@ -16,6 +17,7 @@ namespace InventoryManagement_Backend.Controllers
         }
 
         // GET: api/user
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserReadDto>>> GetAllUsers()
         {
@@ -24,6 +26,7 @@ namespace InventoryManagement_Backend.Controllers
         }
 
         // GET: api/user/{id}
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserByIDReadDto>> GetUser(int id)
         {
@@ -50,15 +53,17 @@ namespace InventoryManagement_Backend.Controllers
         //}
 
         //// PUT: api/customers/{id}
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> UpdateCustomer(int id, UpdateCustomerDto dto)
-        //{
-        //    var success = await _service.UpdateCustomerAsync(id, dto);
-        //    if (!success) return NotFound();
-        //    return NoContent();
-        //}
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<ActionResult<UserByIDReadDto>> UpdateUserDetails(int id, UpdateCustomerDto dto)
+        {
+            var updatedUser = await _service.UpdateUserAsync(id, dto);
+            if (updatedUser==null) return NotFound();
+            return Ok(updatedUser);
+        }
 
         // DELETE: api/user/{id}
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

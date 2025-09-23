@@ -18,7 +18,7 @@ namespace InventoryManagement_Backend.Controllers
             _supplierService = supplierService;
         }
 
-        //[Authorize (Roles = "Admin")]
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupplierReadDto>>> GetSuppliers()
         {
@@ -28,6 +28,7 @@ namespace InventoryManagement_Backend.Controllers
             return Ok(suppliers);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<SupplierReadDto>> GetSupplier(int id)
         {
@@ -36,6 +37,7 @@ namespace InventoryManagement_Backend.Controllers
             return Ok(supplier);
         }
 
+        [Authorize]
         [HttpPost("add_supplier")]
         public async Task<ActionResult<SupplierReadDto>> PostSupplier(SupplierCreateDto dto)
         {
@@ -45,6 +47,7 @@ namespace InventoryManagement_Backend.Controllers
             return CreatedAtAction(nameof(GetSupplier), new { id = created.SupplierId }, created);
         }
 
+        [Authorize]
         [HttpPatch("update_supplier/{id}")]
         public async Task<IActionResult> PutSupplier(int id, SupplierUpdateDto dto)
         {
@@ -54,6 +57,7 @@ namespace InventoryManagement_Backend.Controllers
             return Ok(new { message = $"Supplier with ID {id} updated successfully." });
         }
 
+        [Authorize]
         [HttpDelete("remove_supplier/{id}")]
         public async Task<IActionResult> DeleteSupplier(int id)
         {

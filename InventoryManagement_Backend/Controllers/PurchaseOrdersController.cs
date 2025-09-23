@@ -1,4 +1,5 @@
-﻿using InventoryManagement_Backend.Data;
+﻿using Hangfire.Server;
+using InventoryManagement_Backend.Data;
 using InventoryManagement_Backend.Dtos;
 using InventoryManagement_Backend.Models;
 using InventoryManagement_Backend.Services;
@@ -64,7 +65,7 @@ namespace InventoryManagement_Backend.Controllers
             };
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet] // GET: api/PurchaseSalesOrders
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetAllOrders()
         {
@@ -102,6 +103,28 @@ namespace InventoryManagement_Backend.Controllers
             catch (Exception ex) {
                 return StatusCode(500, $"Error fetching orders: {ex.Message}");
             }
+        }
+
+        [Authorize]
+        [HttpGet("myOrders/{userId}")]
+        public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetUserOrdersById(int userId)
+        {
+            if (userId <= 0)
+            {
+                return BadRequest("Invalid User id");
+            }
+            var user = await _dbContext.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("No User Found");
+            }
+            var myOrders = await _service.GetUserOrders(userId);
+            if (myOrders == null || !myOrders.Any()) // Added a check for an empty list
+            {
+                return NotFound("No Order Found");
+            }
+
+            return Ok(myOrders.Select(MapToDto));
         }
 
         [Authorize]
@@ -159,7 +182,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet("type/{type}")]
         public async Task<ActionResult<IEnumerable<PurchaseSalesOrderDto>>> GetOrderByType(string type)
         {
@@ -184,7 +207,7 @@ namespace InventoryManagement_Backend.Controllers
            
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<PurchaseSalesOrderDto>> UpdateOrders(int id, PurchaseSalesOrderDto orderDto)
         {
@@ -210,9 +233,9 @@ namespace InventoryManagement_Backend.Controllers
                 {
                     return BadRequest("Total Amount must be greater than zero.");
                 }
-                if (DateTime.Now != orderDto.OrderDate)
+                if (DateTime.Now.Date != orderDto.OrderDate.Date)
                 {
-                    return BadRequest("Date/Time should be current time.");
+                    return BadRequest("Date should be the current date.");
                 }
                 if (!((orderDto.OrderType == "P" && orderDto.SupplierId > 0 && (orderDto.UserId == null || orderDto.UserId <= 0)) ||
                         (orderDto.OrderType == "S" && orderDto.UserId > 0 && (orderDto.SupplierId == null || orderDto.SupplierId <= 0))))
@@ -248,7 +271,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<bool>> DeleteOrder(int id)
         {
@@ -269,7 +292,7 @@ namespace InventoryManagement_Backend.Controllers
         }
 
         // ANALYTICS
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/totalsales")]
         public async Task<ActionResult<decimal>> GetTotalSales()
         {
@@ -282,7 +305,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/totalpurchases")]
         public async Task<ActionResult<decimal>> GetTotalPurchases()
         {
@@ -296,7 +319,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/profits")]
         public async Task<ActionResult<decimal>> GetProfits()
         {
@@ -310,7 +333,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/monthly/{year}")]
         public async Task<ActionResult<IEnumerable<object>>> GetMothlyReport([Range(2000, 3000)] int year)
         {
@@ -325,7 +348,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/yearly")]
         public async Task<ActionResult<IEnumerable<object>>> GetYearlyReport()
         {
@@ -339,7 +362,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/LastSevenDays")]
         public async Task<ActionResult<IEnumerable<object>>> GetWeeklyReport()
         {
@@ -353,7 +376,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/today")]
         public async Task<ActionResult<IEnumerable<object>>> GetTodayReport()
         {
@@ -367,7 +390,7 @@ namespace InventoryManagement_Backend.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet("analytics/custom")]
         public async Task<ActionResult<IEnumerable<object>>> GetCustomDatesReport(DateTime startDate, DateTime endDate)
         {
@@ -381,6 +404,20 @@ namespace InventoryManagement_Backend.Controllers
                 }
                 return Ok(await _service.GetCustomTrendsAsync(startDate, endDate));
             }catch(Exception ex)
+            {
+                return StatusCode(500, $"Error fetching custom report: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("analytics/ProductsSold")]
+        public async Task<ActionResult<int>> GetTotalProductsSold()
+        {
+            try
+            {
+                return Ok(await _service.GetTotalProductsSold());
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, $"Error fetching custom report: {ex.Message}");
             }

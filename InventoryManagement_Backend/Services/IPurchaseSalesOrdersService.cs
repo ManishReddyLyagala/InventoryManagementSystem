@@ -8,6 +8,8 @@ namespace InventoryManagement_Backend.Services
         Task<IEnumerable<Models.PurchaseSalesOrders>> GetAllAsync();
         Task<Models.PurchaseSalesOrders?> GetByIdAsync(int id);
         Task<IEnumerable<Models.PurchaseSalesOrders>> GetByTypeAsync(string type);
+
+        Task<IEnumerable<PurchaseSalesOrders>> GetUserOrders(int id);
         Task<List<PurchaseSalesOrders>> CreateOrderAsync(OrderCreateRequest order);
         Task<Models.PurchaseSalesOrders?> UpdateAsync(int id, PurchaseSalesOrderDto order);
         Task<bool> DeleteAsync(int id);
@@ -22,5 +24,7 @@ namespace InventoryManagement_Backend.Services
         Task<IEnumerable<object>> GetWeeklyTrendsAsync();
         Task<IEnumerable<object>> GetTodayTrendsAsync();
         Task<IEnumerable<object>> GetCustomTrendsAsync(DateTime startDate, DateTime endDate);
+
+        Task<int> GetTotalProductsSold();
     }
 }

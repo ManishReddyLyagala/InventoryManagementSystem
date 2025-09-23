@@ -34,12 +34,15 @@ namespace InventoryManagement_Backend.Services
                     Quantity = o.Quantity,
                     TotalAmount = o.TotalAmount,
                     SupplierId = o.SupplierId,
-                    UserId = o.UserId
+                    CustomerId = o.UserId,
+                    CustomerName = o.User.Name,
+                    ProductName = o.Product.Name,
+                    SupplierName = o.Supplier.Name
                 })
                 .ToListAsync();
         }
 
-        public async Task<TransactionDto?> GetByIdAsync(int id)
+        public async Task<IEnumerable<TransactionDto?>> GetByIdAsync(int id)
         {
             if (id <= 0) throw new ArgumentException("Invalid transaction ID.");
 
@@ -57,14 +60,20 @@ namespace InventoryManagement_Backend.Services
                     Quantity = o.Quantity,
                     TotalAmount = o.TotalAmount,
                     SupplierId = o.SupplierId,
-                    UserId = o.UserId
-                })
-                .FirstOrDefaultAsync();
+                    CustomerId = o.UserId,
+                    SupplierName = o.Supplier.Name
+                }).ToListAsync();
+
         }
 
         public async Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int userId)
         {
             if (userId <= 0) throw new ArgumentException("Invalid user ID.");
+            bool userExist = await _context.User.AnyAsync(u => u.UserId == userId);
+            if(!userExist)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} does not exist.");
+            }
 
             return await _context.Transactions
                 .Include(t => t.PurchaseSalesOrders)
@@ -80,7 +89,9 @@ namespace InventoryManagement_Backend.Services
                     Quantity = o.Quantity,
                     TotalAmount = o.TotalAmount,
                     SupplierId = o.SupplierId,
-                    UserId = o.UserId
+                    CustomerId = o.UserId,
+                    SupplierName = o.Supplier.Name
+
                 })
                 .ToListAsync();
         }
@@ -95,7 +106,7 @@ namespace InventoryManagement_Backend.Services
             {
                 TransactionType = transactionDto.TransactionType,
                 TransactionDate = transactionDto.TransactionDate,
-                Status = transactionDto.Status ?? TransactionStatus.Pending
+                Status = transactionDto.Status ?? TransactionStatus.Completed
             };
 
             _context.Transactions.Add(transaction);
@@ -202,7 +213,7 @@ namespace InventoryManagement_Backend.Services
                     Quantity = o.Quantity,
                     TotalAmount = o.TotalAmount,
                     SupplierId = o.SupplierId,
-                    UserId = o.UserId
+                    CustomerId = o.UserId
                 })
                 .ToListAsync();
         }
